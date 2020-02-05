@@ -30,8 +30,13 @@ def softmax(X, Y, w, arg=None, reg=None, HProp=None, gProp=None):
     global d, C
     n, d = X.shape
     C = int(len(w)/d)
+
     w = w.reshape(d*C, 1)  # [d*C x 1]
+
     W = w.reshape(C, d).T  # [d x C]
+
+
+
     XW = np.dot(X, W)  # [n x C]
     large_vals = np.amax(XW, axis=1).reshape(n, 1)  # [n,1 ]
     large_vals = np.maximum(0, large_vals)  # M(x), [n, 1]
@@ -164,8 +169,8 @@ def main():
     Y = I[ind, :]
     lamda = 0
 #    reg = None
-#    reg = lambda x: regConvex(x, lamda)
-    def reg(x): return regNonconvex(x, lamda)
+    reg = lambda x: regConvex(x, lamda)
+#     def reg(x): return regNonconvex(x, lamda)
     w = rand.randn(d*(total_C-1), 1)
     def fun(x): return softmax(X, Y, x, reg=reg)
     # derivativetest(fun, w)
