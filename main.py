@@ -431,6 +431,8 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
     g_sum_0_norm = np.linalg.norm(g_sum_0)  # norm of the gradient
     g_sum_0_normed = g_sum_0 / g_sum_0_norm  # normalized gradient
 
+    g_sum_s_normed = g_sum_0_normed
+
     c_sum = 1
 
     while t <= max_iterations:  # steps
@@ -495,14 +497,16 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
             g_1_normed = g_1 / g_1_norm  # normalized gradient
 
             g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
-            if g_1_sum0_dot < -0.9:
+            g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
+            if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+                print(t, g_1_sum0_dot, g_sums_sum0_dot)
                 step_sum = step_sum * 0.5
             else:
-                step_sum = step_sum * 1.01
+                step_sum = step_sum * 1.1
 
             x_0 = x_1
             g_0_normed = g_1_normed
-            g_sum_0_normed = g_sum_1_normed
+            g_sum_s_normed = g_sum_0_normed
             x_out = np.append(x_out, [x_0], axis=0)
 
             x_s = x_0
@@ -517,7 +521,7 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
 
 
 
-
+        print(t, step_g, step_sum)
 
 
 
@@ -540,7 +544,7 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
 
 
 
-
+    make a function that does undo, half the step, try again
 
 
 
@@ -614,7 +618,7 @@ def MATYAS_grad(x):
 ############## Soft Max ###############
 rand.seed(2)
 n = 300
-d = 50
+d = 70
 total_C = 2
 
 # X = rand.randn(n, d)   #Let X be a random matrix
@@ -828,9 +832,10 @@ f3 = np.array([func_main(i) for i in x_out_3])
 f2 = np.array([func_main(i) for i in x_out_2])
 f1 = np.array([func_main(i) for i in x_out_1])
 
-ax2.plot(t_3_arr, f3, '.-', label='BGD')
-ax2.plot(t_2_arr, f2, '.-', label='ADAM')
 # ax2.plot(t_1_arr,  f1, '.-', label='GD')
+ax2.plot(t_2_arr, f2, 'b.-', label='ADAM')
+ax2.plot(t_3_arr, f3, 'y.-', label='BGD')
+
 plt.xlabel("steps")
 plt.ylabel("function value")
 legend = ax2.legend()
