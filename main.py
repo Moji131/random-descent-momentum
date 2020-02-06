@@ -689,6 +689,441 @@ def bisec_gd_opt_s4(x_start, gradient_func, l_rate, step_mult_max, max_iteration
 
 
 
+def bisec_gd_opt_s3(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+
+    # this function doubles the step until it finds a pair
+    # after finding a pair it returns half a step in the direction of the current gradient
+    # From this point it goes in the direction of the sum of the previous step and the one before that
+    # if the the direction of gradient at this point is against the prevoius sum direction it halves the step_sum
+    # otherwise it does step_sum * 1.01
+    # then it resets the saved gradient to the curent one and starts over
+
+    # bisection gradient descent optimization function
+    t = 0  # step counter to zero
+    step_g = l_rate  # inital step (can be anything)
+    step_sum = l_rate
+    step_sum_save = step_sum
+
+
+    # put the initial point as the saved point
+    t = t + 1  # increase step counter
+    x_s = x_start  # set x_s to x_start
+    x_out = np.array([x_s])  # add to x_out array for graph
+    g_s = gradient_func(x_s)  # gradient at new point
+    g_s_norm = np.linalg.norm(g_s)  # norm of the gradient
+    g_s_normed = g_s / g_s_norm  # normalized gradient
+
+    # advance x one step
+    t = t + 1  # increase step counter
+    x_0 = x_s - g_s_normed * step_g  # advance x
+    # x_out = np.append(x_out, [x_0], axis=0) #add to x_out array for graph
+    g_0 = gradient_func(x_0)  # gradient at new point
+    g_0_norm = np.linalg.norm(g_0)  # norm of the gradient
+    g_0_normed = g_0 / g_0_norm  # normalized gradient
+
+    g_sum_0 = g_0_normed + g_s_normed
+    g_sum_0_norm = np.linalg.norm(g_sum_0)  # norm of the gradient
+    g_sum_0_normed = g_sum_0 / g_sum_0_norm  # normalized gradient
+
+    g_sum_s_normed = g_sum_0_normed
+
+    c_sum = 1
+
+    while t <= max_iterations:  # steps
+        # advance x one step
+        t = t + 1  # increase step counter
+        # x_1 = x_0 - g_0_normed * step_g - g_sum_0_normed * step_sum # advance x
+        x_1 = x_0 - g_0_normed * step_g
+        g_1 = gradient_func(x_1)  # gradient at new point
+        g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+        g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+
+        # # caculating step_sum for the next iteration
+        # # dot product of g_sum_1 and g_sum_0
+        # g_sum_1_0_dot = np.dot(g_sum_1_normed, g_sum_0_normed)
+        #
+        # if g_sum_1_0_dot < 0:
+        #     step_sum = step_sum * 0.5
+        # else:
+        #     step_sum = step_sum * 1.5
+
+
+
+        # caculating step for the next iteration
+        # dot product of gradient_1 and gradient_0
+        g_1_0_dot = np.dot(g_1_normed, g_0_normed)
+        # dot product of gradient_1 and gradient_s
+        g_1_s_dot = np.dot(g_1_normed, g_s_normed)
+
+        if g_1_0_dot < g_1_s_dot:
+            x_s = x_0
+            g_1_s_dot = g_1_0_dot
+            g_s_normed = g_0_normed
+
+        x_0 = x_1
+        g_0_normed = g_1_normed
+        x_out = np.append(x_out, [x_0], axis=0)
+
+        if g_1_s_dot < 0:
+
+            step_g = step_g * 0.5
+
+            t = t + 1  # increase step counter
+            x_1 = x_0 - g_0_normed * step_g
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+            g_sum_1 = g_0_normed + g_s_normed
+            g_sum_1_norm = np.linalg.norm(g_sum_1)  # norm of the gradient
+            g_sum_1_normed = g_sum_1 / g_sum_1_norm  # normalized gradient
+
+            x_0 = x_1
+            g_0_normed = g_1_normed
+            g_sum_0_normed = g_sum_1_normed
+            x_out = np.append(x_out, [x_0], axis=0)
+
+            t = t + 1  # increase step counter
+            x_1 = x_0 - g_sum_0_normed * step_sum
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+            g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
+            g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
+            if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+                print(t, g_1_sum0_dot, g_sums_sum0_dot)
+                step_sum = step_sum * 0.5
+            else:
+                step_sum = step_sum * 1.1
+
+            x_0 = x_1
+            g_0_normed = g_1_normed
+            g_sum_s_normed = g_sum_0_normed
+            x_out = np.append(x_out, [x_0], axis=0)
+
+            x_s = x_0
+            g_s_normed = g_0_normed
+
+
+
+
+        else:
+            step_g = step_g * 1.5
+            # c_sum = 0
+
+
+
+        print(t, step_g, step_sum)
+
+
+
+
+        # break for small gradient
+        if g_1_norm < g_norm_min:
+            break
+
+
+        # save the points for graph and print progress
+        c = max_iterations//tot_num_save
+        c_1 = t % c
+        if c_1 == 0:
+            # add to x_out array for graph
+            # x_out = np.append(x_out, [x_0], axis=0)
+            print("BGD_3 %: ", int((t-1)/max_iterations*100))
+
+
+    return x_out, t-1
+
+
+
+
+
+
+
+
+def bisec_gd_opt_s5(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+
+    # this function doubles the step until it finds a pair
+    # after finding a pair it returns half a step in the direction of the current gradient
+    # From this point it calculates the sum of the previous step and the one before that
+    # it then uses this sum in an ADAM algorithm and goes one ADAM step.
+    # It countinues until it does not have a pair and starts over
+    # have problems converging to the minimum
+
+
+    # bisection gradient descent optimization function
+    t = 0  # step counter to zero
+    step_g = l_rate  # inital step (can be anything)
+    step_sum = l_rate
+    step_sum_save = step_sum
+
+
+    # put the initial point as the saved point
+    t = t + 1  # increase step counter
+    x_s = x_start  # set x_s to x_start
+    x_out = np.array([x_s])  # add to x_out array for graph
+    g_s = gradient_func(x_s)  # gradient at new point
+    g_s_norm = np.linalg.norm(g_s)  # norm of the gradient
+    g_s_normed = g_s / g_s_norm  # normalized gradient
+
+    # advance x one step
+    t = t + 1  # increase step counter
+    x_0 = x_s - g_s_normed * step_g  # advance x
+    x_out = np.append(x_out, [x_0], axis=0) #add to x_out array for graph
+    g_0 = gradient_func(x_0)  # gradient at new point
+    g_0_norm = np.linalg.norm(g_0)  # norm of the gradient
+    g_0_normed = g_0 / g_0_norm  # normalized gradient
+
+    g_sum_0 = g_0_normed + g_s_normed
+    g_sum_0_norm = np.linalg.norm(g_sum_0)  # norm of the gradient
+    if g_sum_0_norm == 0:
+        g_sum_0_normed = np.zeros(len(g_sum_0))
+    else:
+        g_sum_0_normed = g_sum_0 / g_sum_0_norm  # normalized gradient
+
+    g_sum_s_normed = g_sum_0_normed
+
+    c_sum = 1
+
+    while t <= max_iterations:  # steps
+        # advance x one step
+        t = t + 1  # increase step counter
+        # x_1 = x_0 - g_0_normed * step_g - g_sum_0_normed * step_sum # advance x
+        x_1 = x_0 - g_0_normed * step_g
+        x_out = np.append(x_out, [x_1], axis=0)
+        g_1 = gradient_func(x_1)  # gradient at new point
+        g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+        if g_1_norm == 0:
+            g_1_normed = np.zeros(len(g_1))
+        else:
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+
+        # caculating step for the next iteration
+        # dot product of gradient_1 and gradient_0
+        g_1_0_dot = np.dot(g_1_normed, g_0_normed)
+        # dot product of gradient_1 and gradient_s
+        g_1_s_dot = np.dot(g_1_normed, g_s_normed)
+
+        if g_1_0_dot < g_1_s_dot:
+            x_s = x_0
+            g_1_s_dot = g_1_0_dot
+            g_s_normed = g_0_normed
+
+        x_0 = x_1
+        g_0_normed = g_1_normed
+        g_sum_s_normed = g_sum_0_normed
+
+
+        if g_1_s_dot < 0:
+
+            step_g = step_g * 0.5
+
+            t = t + 1  # increase step counter
+            x_1 = x_0 - g_0_normed * step_g
+            x_out = np.append(x_out, [x_1], axis=0)
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            if g_1_norm == 0:
+                g_1_normed = np.zeros(len(g_1))
+            else:
+                g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+
+            g_sum_1 = g_0_normed + g_s_normed
+            g_sum_1_norm = np.linalg.norm(g_sum_1)  # norm of the gradient
+            if g_sum_1_norm == 0:
+                g_sum_1_normed = np.zeros(len(g_sum_1))
+            else:
+                g_sum_1_normed = g_sum_1 / g_sum_1_norm  # normalized gradient
+
+
+            x_0 = x_1
+            g_0_normed = g_1_normed
+            g_sum_0_normed = g_sum_1_normed
+
+            # t = t + 1  # increase step counter
+            # x_1 = x_0 - g_sum_0_normed * step_sum
+            # g_1 = gradient_func(x_1)  # gradient at new point
+            # g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            # g_1_normed = g_1 / g_1_norm  # normalized gradient
+            #
+            # g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
+            # g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
+            # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+            #     print(t, g_1_sum0_dot, g_sums_sum0_dot)
+            #     step_sum = step_sum * 0.5
+            # else:
+            #     step_sum = step_sum * 1.1
+
+            m = beta_1 * m + (1 - beta_1) * g_sum_1_normed
+            v = beta_2 * v + (1 - beta_2) * np.power(g_sum_1_normed, 2)
+            m_hat = m / (1 - beta_1 ** t)
+            v_hat = v / (1 - beta_2 ** t)
+
+            x_1 = x_0 - (l_rate * m_hat) / (np.sqrt(v_hat) + epsilon)
+            x_out = np.append(x_out, [x_1], axis=0)
+
+
+
+            x_0 = x_1
+            g_0_normed = g_1_normed
+            g_sum_s_normed = g_sum_0_normed
+
+            x_s = x_0
+            g_s_normed = g_0_normed
+
+
+
+
+        else:
+            step_g = step_g * 1.5
+            m = 0
+            v = 0
+            # c_sum = 0
+
+
+
+
+
+
+
+        # break for small gradient
+        if g_1_norm < g_norm_min:
+            break
+
+
+        # save the points for graph and print progress
+        c = max_iterations//tot_num_save
+        c_1 = t % c
+        if c_1 == 0:
+            # add to x_out array for graph
+            # x_out = np.append(x_out, [x_0], axis=0)
+            print("BGD_3 %: ", int((t-1)/max_iterations*100))
+
+
+    return x_out, t-1
+
+
+
+
+
+
+
+
+
+
+
+def bisec_gd_opt_s7(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+    # this pone does BGD and when it is stuck it hands over to adam
+    # not much of a success
+    # bisection gradient descent optimization function
+    t = 0  # step counter to zero
+    step_g = l_rate  # inital step (can be anything)
+    step_sum = l_rate
+
+    # put the initial point as the saved point
+    t = t + 1  # increase step counter
+    x_s = x_start  # set x_s to x_start
+    x_out = np.array([x_s])  # add to x_out array for graph
+    g_s = gradient_func(x_s)  # gradient at new point
+    g_s_norm = np.linalg.norm(g_s)  # norm of the gradient
+    g_s_normed = g_s / g_s_norm  # normalized gradient
+
+    # advance x one step
+    t = t + 1  # increase step counter
+    x_0 = x_s - g_s_normed * step_g  # advance x
+    # x_out = np.append(x_out, [x_0], axis=0) #add to x_out array for graph
+    g_0 = gradient_func(x_0)  # gradient at new point
+    g_0_norm = np.linalg.norm(g_0)  # norm of the gradient
+    g_0_normed = g_0 / g_0_norm  # normalized gradient
+
+    n_pair = 0
+    check_adam = False
+
+    while t <= max_iterations:  # steps
+        # advance x one step
+        t = t + 1  # increase step counter
+        # x_1 = x_0 - g_0_normed * step_g + g_sum_0_normed * step_sum # advance x
+        x_1 = x_0 - g_0_normed * step_g
+        g_1 = gradient_func(x_1)  # gradient at new point
+        g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+        g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+
+
+
+        # caculating step_g for the next iteration
+        # dot product of gradient_1 and gradient_0
+        g_1_0_dot = np.dot(g_1_normed, g_0_normed)
+        # dot product of gradient_1 and gradient_s
+        g_1_s_dot = np.dot(g_1_normed, g_s_normed)
+
+        if g_1_0_dot < g_1_s_dot:
+            g_1_s_dot = g_1_0_dot
+            g_s_normed = g_0_normed
+
+        if g_1_s_dot < 0:
+            n_pair = n_pair + 1
+            if n_pair  > 10:
+                print("stuck!")
+                g_sum_1 = g_0_normed + g_s_normed
+                g_sum_1_norm = np.linalg.norm(g_sum_1)  # norm of the gradient
+                if g_sum_1_norm < 1e-100:
+                    check_adam = False
+                    break
+                else:
+                    check_adam = True
+                    break
+            step_g = step_g * 0.5
+        else:
+            n_pair = 0
+            step_g = step_g * 2.0
+
+        # swap values for the next step
+        x_0 = x_1
+        g_0_normed = g_1_normed
+
+
+        # swap values for the next step
+        x_0 = x_1
+
+
+
+
+
+
+        # save the points for graph and print progress
+        c = max_iterations//tot_num_save
+        c_1 = t % c
+        if c_1 == 0:
+            # add to x_out array for graph
+            x_out = np.append(x_out, [x_0], axis=0)
+            print("BGD_3 %: ", int((t-1)/max_iterations*100))
+
+
+    if check_adam == True:
+        m = 0
+        v = 0
+
+        while t <= max_iterations:
+            g_0 = gradient_func(x_0)
+            m = beta_1 * m + (1 - beta_1) * g_0
+            v = beta_2 * v + (1 - beta_2) * np.power(g_0, 2)
+            m_hat = m / (1 - beta_1 ** t)
+            v_hat = v / (1 - beta_2 ** t)
+            x_1 = x_0 - (l_rate * m_hat) / (np.sqrt(v_hat) + epsilon)
+            x_out = np.append(x_out, [x_0], axis=0)
+            t = t + 1
+
+            x_0 = x_1
+
+    return x_out, t-1
+
+
+
 
 
 
@@ -743,6 +1178,17 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
         g_1_normed = g_1 / g_1_norm  # normalized gradient
 
 
+        # # caculating step_sum for the next iteration
+        # # dot product of g_sum_1 and g_sum_0
+        # g_sum_1_0_dot = np.dot(g_sum_1_normed, g_sum_0_normed)
+        #
+        # if g_sum_1_0_dot < 0:
+        #     step_sum = step_sum * 0.5
+        # else:
+        #     step_sum = step_sum * 1.5
+
+
+
         # caculating step for the next iteration
         # dot product of gradient_1 and gradient_0
         g_1_0_dot = np.dot(g_1_normed, g_0_normed)
@@ -777,26 +1223,19 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
             g_sum_0_normed = g_sum_1_normed
             x_out = np.append(x_out, [x_0], axis=0)
 
-            # t = t + 1  # increase step counter
-            # x_1 = x_0 - g_sum_0_normed * step_sum
-            # g_1 = gradient_func(x_1)  # gradient at new point
-            # g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            # g_1_normed = g_1 / g_1_norm  # normalized gradient
-            #
-            # g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
-            # g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
-            # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
-            #     print(t, g_1_sum0_dot, g_sums_sum0_dot)
-            #     step_sum = step_sum * 0.5
-            # else:
-            #     step_sum = step_sum * 1.1
+            t = t + 1  # increase step counter
+            x_1 = x_0 - g_sum_0_normed * step_sum
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
 
-            m = beta_1 * m + (1 - beta_1) * g_sum_1_normed
-            v = beta_2 * v + (1 - beta_2) * np.power(g_sum_1_normed, 2)
-            m_hat = m / (1 - beta_1 ** t)
-            v_hat = v / (1 - beta_2 ** t)
-            x_1 = x_0 - (l_rate * m_hat) / (np.sqrt(v_hat) + epsilon)
-            # x_out = np.append(x_out, [x], axis=0)
+            g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
+            g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
+            # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+            if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+                step_sum = step_sum * 0.5
+            else:
+                step_sum = step_sum * 1.5
 
             x_0 = x_1
             g_0_normed = g_1_normed
@@ -811,11 +1250,7 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
 
         else:
             step_g = step_g * 1.5
-            m = 0
-            v = 0
             # c_sum = 0
-
-
 
 
 
@@ -966,7 +1401,7 @@ def softMax_main(x):
 
 
 # converging parameters
-max_iterations = 1000# maximum number of iterations
+max_iterations = 100 # maximum number of iterations
 tot_num_save = max_iterations # max(int(max_iterations/100), max_iterations)
 min_g = -1  # 0.0001   #minimum gradient
 
@@ -981,21 +1416,33 @@ l_rate = 0.01
 step_mult_max = 0.9
 
 
+
+
+
 func_main = softMax_main
 func_grad = softMax_grad
-# x_start = np.random.randint(2, size=d)
-# x_start = np.zeros(d)
-# x_start = np.ones(d)
+x_start = np.random.randint(2, size=d)
+x_start = np.zeros(d)
+x_start = np.ones(d)
+
+# import time
+# rand.seed(int(time.time()))
 x_start = rand.randn(d)
-x_min = -0.5
+# x_start = np.array([-0.4, 0])
+# print(x_start)
+
+x_min = -0.2
 x_max = 0.1
-y_min = -0.05
-y_max = 0.05
+y_min = -0.25
+y_max = 0.15
 x_opt = 0
 y_opt = 0
 
-#
+
+
+
 # # for this one enable the log plot below
+# d = 2
 # func_main = rosenbrock_main
 # func_grad = rosenbrock_grad
 # x_start = np.array([1, 2.5])
@@ -1007,7 +1454,7 @@ y_opt = 0
 # y_opt = 0
 
 
-#
+
 # # for this one enable the normal (not log) plot below
 # func_main = EASOM_main
 # func_grad = EASOM_grad
@@ -1083,8 +1530,8 @@ if d  == 2:
     fig1 = plt.figure(1)
     ax1 = fig1.add_subplot(111)
     cmap = plt.get_cmap('seismic')
-    cs = ax1.contourf(mx, my, np.log10(f), 100, cmap=cmap) #enable this for Rosenbrock function
-    # cs = ax1.contourf(mx, my, f, 100, cmap=cmap)  #enable this for EASOM function
+    # cs = ax1.contourf(mx, my, np.log10(f), 100, cmap=cmap) #enable this for Rosenbrock function
+    cs = ax1.contourf(mx, my, f, 100, cmap=cmap)  #enable this for EASOM function
     fig1.colorbar(cs, ax=ax1, shrink=0.9)
 
     # fig3 = plt.figure(3)
@@ -1114,10 +1561,16 @@ if d  == 2:
 ################# final plots #########################
 ###########################################################
 
+# print(x_out_3)
 # creating step number arrays for diffrent outputs
-t_1_arr = np.array([i*max_iterations//100 for i in range(0, x_out_1.shape[0])])
-t_2_arr = np.array([i*max_iterations//100 for i in range(0, x_out_2.shape[0])])
-t_3_arr = np.array([i*max_iterations//100 for i in range(0, x_out_3.shape[0])])
+# t_1_arr = np.array([i*max_iterations//100 for i in range(0, x_out_1.shape[0])])
+# t_2_arr = np.array([i*max_iterations//100 for i in range(0, x_out_2.shape[0])])
+# t_3_arr = np.array([i*max_iterations//100 for i in range(0, x_out_3.shape[0])])
+
+t_1_arr = np.array([i for i in range(0, x_out_1.shape[0])])
+t_2_arr = np.array([i for i in range(0, x_out_2.shape[0])])
+t_3_arr = np.array([i for i in range(0, x_out_3.shape[0])])
+
 
 # ploting the convergence graph
 fig2 = plt.figure(2)
