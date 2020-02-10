@@ -277,7 +277,7 @@ def bisec_gd_opt_s1(x_start, gradient_func, l_rate, step_mult_max, max_iteration
 
 
 
-def bisec_gd_opt_s1(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+def bisec_gd_opt_s2(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
 
 
     # This one does not have saved. just compares both g and g_sum with previous and halves the step if they are opposing
@@ -689,154 +689,6 @@ def bisec_gd_opt_s4(x_start, gradient_func, l_rate, step_mult_max, max_iteration
 
 
 
-def bisec_gd_opt_s3(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
-
-    # this function doubles the step until it finds a pair
-    # after finding a pair it returns half a step in the direction of the current gradient
-    # From this point it goes in the direction of the sum of the previous step and the one before that
-    # if the the direction of gradient at this point is against the prevoius sum direction it halves the step_sum
-    # otherwise it does step_sum * 1.01
-    # then it resets the saved gradient to the curent one and starts over
-
-    # bisection gradient descent optimization function
-    t = 0  # step counter to zero
-    step_g = l_rate  # inital step (can be anything)
-    step_sum = l_rate
-    step_sum_save = step_sum
-
-
-    # put the initial point as the saved point
-    t = t + 1  # increase step counter
-    x_s = x_start  # set x_s to x_start
-    x_out = np.array([x_s])  # add to x_out array for graph
-    g_s = gradient_func(x_s)  # gradient at new point
-    g_s_norm = np.linalg.norm(g_s)  # norm of the gradient
-    g_s_normed = g_s / g_s_norm  # normalized gradient
-
-    # advance x one step
-    t = t + 1  # increase step counter
-    x_0 = x_s - g_s_normed * step_g  # advance x
-    # x_out = np.append(x_out, [x_0], axis=0) #add to x_out array for graph
-    g_0 = gradient_func(x_0)  # gradient at new point
-    g_0_norm = np.linalg.norm(g_0)  # norm of the gradient
-    g_0_normed = g_0 / g_0_norm  # normalized gradient
-
-    g_sum_0 = g_0_normed + g_s_normed
-    g_sum_0_norm = np.linalg.norm(g_sum_0)  # norm of the gradient
-    g_sum_0_normed = g_sum_0 / g_sum_0_norm  # normalized gradient
-
-    g_sum_s_normed = g_sum_0_normed
-
-    c_sum = 1
-
-    while t <= max_iterations:  # steps
-        # advance x one step
-        t = t + 1  # increase step counter
-        # x_1 = x_0 - g_0_normed * step_g - g_sum_0_normed * step_sum # advance x
-        x_1 = x_0 - g_0_normed * step_g
-        g_1 = gradient_func(x_1)  # gradient at new point
-        g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-        g_1_normed = g_1 / g_1_norm  # normalized gradient
-
-
-        # # caculating step_sum for the next iteration
-        # # dot product of g_sum_1 and g_sum_0
-        # g_sum_1_0_dot = np.dot(g_sum_1_normed, g_sum_0_normed)
-        #
-        # if g_sum_1_0_dot < 0:
-        #     step_sum = step_sum * 0.5
-        # else:
-        #     step_sum = step_sum * 1.5
-
-
-
-        # caculating step for the next iteration
-        # dot product of gradient_1 and gradient_0
-        g_1_0_dot = np.dot(g_1_normed, g_0_normed)
-        # dot product of gradient_1 and gradient_s
-        g_1_s_dot = np.dot(g_1_normed, g_s_normed)
-
-        if g_1_0_dot < g_1_s_dot:
-            x_s = x_0
-            g_1_s_dot = g_1_0_dot
-            g_s_normed = g_0_normed
-
-        x_0 = x_1
-        g_0_normed = g_1_normed
-        x_out = np.append(x_out, [x_0], axis=0)
-
-        if g_1_s_dot < 0:
-
-            step_g = step_g * 0.5
-
-            t = t + 1  # increase step counter
-            x_1 = x_0 - g_0_normed * step_g
-            g_1 = gradient_func(x_1)  # gradient at new point
-            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            g_1_normed = g_1 / g_1_norm  # normalized gradient
-
-            g_sum_1 = g_0_normed + g_s_normed
-            g_sum_1_norm = np.linalg.norm(g_sum_1)  # norm of the gradient
-            g_sum_1_normed = g_sum_1 / g_sum_1_norm  # normalized gradient
-
-            x_0 = x_1
-            g_0_normed = g_1_normed
-            g_sum_0_normed = g_sum_1_normed
-            x_out = np.append(x_out, [x_0], axis=0)
-
-            t = t + 1  # increase step counter
-            x_1 = x_0 - g_sum_0_normed * step_sum
-            g_1 = gradient_func(x_1)  # gradient at new point
-            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            g_1_normed = g_1 / g_1_norm  # normalized gradient
-
-            g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
-            g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
-            if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
-                print(t, g_1_sum0_dot, g_sums_sum0_dot)
-                step_sum = step_sum * 0.5
-            else:
-                step_sum = step_sum * 1.1
-
-            x_0 = x_1
-            g_0_normed = g_1_normed
-            g_sum_s_normed = g_sum_0_normed
-            x_out = np.append(x_out, [x_0], axis=0)
-
-            x_s = x_0
-            g_s_normed = g_0_normed
-
-
-
-
-        else:
-            step_g = step_g * 1.5
-            # c_sum = 0
-
-
-
-        print(t, step_g, step_sum)
-
-
-
-
-        # break for small gradient
-        if g_1_norm < g_norm_min:
-            break
-
-
-        # save the points for graph and print progress
-        c = max_iterations//tot_num_save
-        c_1 = t % c
-        if c_1 == 0:
-            # add to x_out array for graph
-            # x_out = np.append(x_out, [x_0], axis=0)
-            print("BGD_3 %: ", int((t-1)/max_iterations*100))
-
-
-    return x_out, t-1
-
-
 
 
 
@@ -1123,190 +975,533 @@ def bisec_gd_opt_s7(x_start, gradient_func, l_rate, step_mult_max, max_iteration
     return x_out, t-1
 
 
+#
+# def find_g_n(x_0, gradient_func, n, step)
+#     if n == 0
+#         g_n = gradient_func(x_0)
+#         g_n_norm = np.linalg.norm(g_n)  # norm of the gradient
+#         g_n_normed = g_n / g_n_norm  # normalized gradient
+#         x_1 = x_0
+#         return x_1, g_n_normed, n
+#     elif n == 1
+#         x_1, g_nm1_normed_1 = find_g_n(x_0, gradient_func, n-1, step)
+#         x_2 = x_1 - g_nm1_normed_1 * step[n-1]
+#         x_3, g_nm1_normed_3 = find_g_n(x_2, gradient_func, n-1, step)
+#         g_n = g_nm1_normed_3 + g_nm1_normed_1
+#         g_n_norm = np.linalg.norm(g_n)  # norm of the gradient
+#         g_n_normed = g_n / g_n_norm  # normalized gradient
+#
+#         if g_n < np.sqrt(2):
+#             return x_1, g_n_normed, 1
+#         else:
+#             return x_1, g_n_normed, 0
+#
+#     else:
+#         gn = find_gn(x_0, gradient_func, n-1) +
+#         x_1 = x_0 + find_gn(x_0, gradient_func, n-1)
+#
+#
+#
+# def bisec_gd_opt_s8(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+#
+#     # this function doubles the step until it finds a pair
+#     # after finding a pair it returns half a step in the direction of the current gradient
+#     # From this point it goes in the direction of the sum of the previous step and the one before that
+#     # if the the direction of gradient at this point is against the prevoius sum direction it halves the step_sum
+#     # otherwise it does step_sum * 1.01
+#     # then it resets the saved gradient to the curent one and starts over
+#
+#     # bisection gradient descent optimization function
+#     t = 0  # step counter to zero
+#     step_g = l_rate  # inital step (can be anything)
+#     step_sum = l_rate
+#     step_sum_save = step_sum
+#
+#
+#     # put the initial point as the saved point
+#     x_s = x_start  # set x_s to x_start
+#     x_out = np.array([x_s])  # add to x_out array for graph
+#     g_s = gradient_func(x_s)  # gradient at new point
+#     g_s_norm = np.linalg.norm(g_s)  # norm of the gradient
+#     g_s_normed = g_s / g_s_norm  # normalized gradient
+#     t = t + 1  # increase step counter
+#
+#
+#     # advance x one step
+#     x_0 = x_s - g_s_normed * step_g  # advance x
+#     # x_out = np.append(x_out, [x_0], axis=0) #add to x_out array for graph
+#     g_0 = gradient_func(x_0)  # gradient at new point
+#     g_0_norm = np.linalg.norm(g_0)  # norm of the gradient
+#     g_0_normed = g_0 / g_0_norm  # normalized gradient
+#     t = t + 1  # increase step counter
+#
+#
+#     case = "free run"
+#
+#     while t <= max_iterations:  # steps
+#
+#
+#
+#
+#         if case == "free run":
+#             # advance x one step
+#             t = t + 1  # increase step counter
+#             # x_1 = x_0 - g_0_normed * step_g - g_sum_0_normed * step_sum # advance x
+#             x_1 = x_0 - g_0_normed * step_g
+#             x_out = np.append(x_out, [x_1], axis=0)
+#             g_1 = gradient_func(x_1)  # gradient at new point
+#             g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+#             g_1_normed = g_1 / g_1_norm  # normalized gradient
+#
+#             x_s = x_0
+#             g_s_normed = g_0_normed
+#
+#
+#         if case == "pair g":
+#             # calculating sum to use after the half pair step
+#             g_sum_0 = g_0_normed + g_1_normed
+#             g_sum_0_norm = np.linalg.norm(g_sum_0)  # norm of the gradient
+#             g_sum_0_normed = g_sum_0 / g_sum_0_norm  # normalized gradient
+#
+#             # half pair step to return back to the middle of the pair
+#             x_1 = x_0 - g_0_normed * step_g
+#             g_1 = gradient_func(x_1)  # gradient at new point
+#             g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+#             g_1_normed = g_1 / g_1_norm  # normalized gradient
+#             t = t + 1  # increase step counter
+#
+#             # sum step
+#             x_1 = x_0 - g_sum_0_normed * step_sum
+#             g_1 = gradient_func(x_1)  # gradient at new point
+#             g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+#             g_1_normed = g_1 / g_1_norm  # normalized gradient
+#
+#             if g_1_sum0_dot > 1 / np.sqrt(2):
+#                 case == "free run"
+#             elif g_1_sum0_dot > -1 / np.sqrt(2):
+#                 do_search = True
+#                 while do_search:
+#                     step_sum = step_sum * 0.5
+#                     x_1 = x_0 - g_sum_0_normed * step_sum
+#                     g_1 = gradient_func(x_1)  # gradient at new point
+#                     g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+#                     g_1_normed = g_1 / g_1_norm  # normalized gradient
+#
+#                     # check to accept or reject sum step
+#                     g_1_sum0_dot = np.dot(g_1_normed, g_sum_1_normed)
+#
+#                     if step_sum < step_g:
+#                         break
+#
+#
+#
+#             x_out = np.append(x_out, [x_1], axis=0)
+#             t = t + 1  # increase step counter
+#
+#
+#         # Determining the next step
+#         if case == "free run":
+#             # dot product of gradient_1 and gradient_0
+#             g_1_0_dot = np.dot(g_1_normed, g_0_normed)
+#             if g_1_0_dot >= 0.0:
+#                 step_g = step_g * 2.0
+#             else:
+#                 case == "pair g"
+#                 step_g = step_g * 0.5
+#
+#         if case == "pair g":
+#             #
+#             # t = t + 1  # increase step counter
+#             # x_1 = x_0 - g_0_normed * step_g
+#             # g_1 = gradient_func(x_1)  # gradient at new point
+#             # g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+#             # g_1_normed = g_1 / g_1_norm  # normalized gradient
+#             #
+#             # g_sum_1 = g_0_normed + g_s_normed
+#             # g_sum_1_norm = np.linalg.norm(g_sum_1)  # norm of the gradient
+#             # g_sum_1_normed = g_sum_1 / g_sum_1_norm  # normalized gradient
+#             #
+#             # x_0 = x_1
+#             # g_0_normed = g_1_normed
+#             # g_sum_0_normed = g_sum_1_normed
+#             # x_out = np.append(x_out, [x_0], axis=0)
+#             #
+#             # t = t + 1  # increase step counter
+#             # x_1 = x_0 - g_sum_0_normed * step_sum
+#             # g_1 = gradient_func(x_1)  # gradient at new point
+#             # g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+#             # g_1_normed = g_1 / g_1_norm  # normalized gradient
+#             #
+#             # g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
+#             # g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
+#             # # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+#             # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
+#             #     step_sum = step_sum * 0.5
+#             # else:
+#             #     step_sum = step_sum * 1.5
+#             #
+#             # x_0 = x_1
+#             # g_0_normed = g_1_normed
+#             # g_sum_s_normed = g_sum_0_normed
+#             # x_out = np.append(x_out, [x_0], axis=0)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#         # save the points for graph and print progress
+#         c = max_iterations//tot_num_save
+#         c_1 = t % c
+#         if c_1 == 0:
+#             # add to x_out array for graph
+#             # x_out = np.append(x_out, [x_0], axis=0)
+#             print("BGD_3 %: ", int((t-1)/max_iterations*100))
+#
+#
+#     return x_out, t-1
+#
+#
 
-def find_g_n(x_0, gradient_func, state, step)
-    if state == 0
-        g_n = gradient_func(x_0)
-        g_n_norm = np.linalg.norm(g_n)  # norm of the gradient
-        g_n_normed = g_n / g_n_norm  # normalized gradient
-        return x_0, g_n_normed, state
-    elif state == 1
-        x_0, g_nm1_normed_0 = find_g_n(x_0, gradient_func, state-1, step)
-        x_1 = x_0 - g_0_normed_0 * step[state-1]
-        x_1, g_nm1_normed_1 = find_g_n(x_1, gradient_func, state-1, step)
-        g_n = g_nm1_normed_0 + g_nm1_normed_1
-        g_n_normed = g_n / g_n_norm  # normalized gradient
-        return x_0, g_n_normed
-        if g_n < sqrt(2):
-            return x_1, g_n_normed, 1
-        else:
-            return x_1, g_n_normed, 0
 
 
 
 
-        r
-    else:
-        gn = find_gn(x_0, gradient_func, state-1) +
-        x_1 = x_0 + find_gn(x_0, gradient_func, state-1)
 
 
 
-def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
 
+
+
+
+
+
+
+
+
+def bisec_gd_opt_s9(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+
+    # steps of this function needs double cheking
     # this function doubles the step until it finds a pair
-    # after finding a pair it returns half a step in the direction of the current gradient
-    # From this point it goes in the direction of the sum of the previous step and the one before that
-    # if the the direction of gradient at this point is against the prevoius sum direction it halves the step_sum
-    # otherwise it does step_sum * 1.01
-    # then it resets the saved gradient to the curent one and starts over
+    # after finding a pair it rejects the move and halves the step until there is no pair
+    # then it explores the ditection of sum until it findes a pair of sumes
+    # then it converges in the diection of both g and sum_g
 
     # bisection gradient descent optimization function
     t = 0  # step counter to zero
     step_g = l_rate  # inital step (can be anything)
+    step_g_min = 10**-30
     step_sum = l_rate
-    step_sum_save = step_sum
+    step_sum_min = 10**-30 # if step_sum is smaller than this start converging in the direction of g
 
+    min_sum_g = 10**-30 # if sum of gs are smaller than this do not do sum move and start converging in the direction of g
 
     # put the initial point as the saved point
-    x_s = x_start  # set x_s to x_start
-    x_out = np.array([x_s])  # add to x_out array for graph
-    g_s = gradient_func(x_s)  # gradient at new point
-    g_s_norm = np.linalg.norm(g_s)  # norm of the gradient
-    g_s_normed = g_s / g_s_norm  # normalized gradient
     t = t + 1  # increase step counter
-
-
-    # advance x one step
-    x_0 = x_s - g_s_normed * step_g  # advance x
-    # x_out = np.append(x_out, [x_0], axis=0) #add to x_out array for graph
+    x_0 = x_start  # set x_0 to x_start
+    x_out = np.array([x_0])  # add to x_out array for graph
     g_0 = gradient_func(x_0)  # gradient at new point
     g_0_norm = np.linalg.norm(g_0)  # norm of the gradient
     g_0_normed = g_0 / g_0_norm  # normalized gradient
-    t = t + 1  # increase step counter
 
+    state = 0 # set the state to 0: exploring in the direction of gradient
 
-    case = "free run"
 
     while t <= max_iterations:  # steps
 
+        if state == 0: # when we have no g pairs and doubling the step to explore
+            print(t, "state 0")
 
+            x_1 = x_0 - g_0_normed * step_g # advance x one step
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
 
+            g_1_0_sum = g_1_normed + g_0_normed # caculating the sum to check if they are pairs
+            g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
 
-        if case == "free run":
-            # advance x one step
             t = t + 1  # increase step counter
-            # x_1 = x_0 - g_0_normed * step_g - g_sum_0_normed * step_sum # advance x
-            x_1 = x_0 - g_0_normed * step_g
             x_out = np.append(x_out, [x_1], axis=0)
-            g_1 = gradient_func(x_1)  # gradient at new point
-            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            g_1_normed = g_1 / g_1_norm  # normalized gradient
 
-            x_s = x_0
-            g_s_normed = g_0_normed
-
-
-        if case == "pair g":
-            # calculating sum to use after the half pair step
-            g_sum_0 = g_0_normed + g_1_normed
-            g_sum_0_norm = np.linalg.norm(g_sum_0)  # norm of the gradient
-            g_sum_0_normed = g_sum_0 / g_sum_0_norm  # normalized gradient
-
-            # half pair step to return back to the middle of the pair
-            x_1 = x_0 - g_0_normed * step_g
-            g_1 = gradient_func(x_1)  # gradient at new point
-            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            g_1_normed = g_1 / g_1_norm  # normalized gradient
-            t = t + 1  # increase step counter
-
-            # sum step
-            x_1 = x_0 - g_sum_0_normed * step_sum
-            g_1 = gradient_func(x_1)  # gradient at new point
-            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            g_1_normed = g_1 / g_1_norm  # normalized gradient
-
-            if g_1_sum0_dot > 1 / np.sqrt(2):
-                case == "free run"
-            elif g_1_sum0_dot > -1 / np.sqrt(2):
-                do_search = True
-                while do_search:
-                    step_sum = step_sum * 0.5
-                    x_1 = x_0 - g_sum_0_normed * step_sum
+            if g_1_0_sum_norm < min_sum_g: # gradient pointing right at each other meaning a true minima
+                while g_1_0_sum_norm < np.sqrt(2):
+                    step_g = step_g * 0.5
+                    x_1 = x_0 - g_0_normed * step_g  # advance x one step
                     g_1 = gradient_func(x_1)  # gradient at new point
                     g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
                     g_1_normed = g_1 / g_1_norm  # normalized gradient
 
-                    # check to accept or reject sum step
-                    g_1_sum0_dot = np.dot(g_1_normed, g_sum_1_normed)
+                    g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+                    g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
 
-                    if step_sum < step_g:
+                    t = t + 1  # increase step counter
+                    x_out = np.append(x_out, [x_1], axis=0)
+
+                state = 3 # changing state to 3 for converging in the direction of g
+
+            elif g_1_0_sum_norm < np.sqrt(2): # we have a pair and we use smaller and smaller steps until we do not have a pair anymore
+                # undo move and half the step until tehre is no pair
+                # change the state to 1: until gave g pairs, explore sum_g direction
+                g_1_0_sum_save = g_1_0_sum
+                while g_1_0_sum_norm < np.sqrt(2):
+                    g_1_0_sum_save = g_1_0_sum # to keep the previous sum for the next step
+                    step_g = step_g * 0.5
+
+                    x_1 = x_0 - g_0_normed * step_g # advance x one step
+                    g_1 = gradient_func(x_1)  # gradient at new point
+                    g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                    g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+                    g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+                    g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+
+                    t = t + 1  # increase step counter
+                    x_out = np.append(x_out, [x_1], axis=0)
+
+                x_0 = x_1
+                g_1_0_sum = g_1_0_sum_save
+                g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+                g_1_0_sum_normed = g_1_0_sum / g_1_0_sum_norm  # normalized gradient
+                state = 1
+
+            else:
+                # continue with the next step as state
+                t = t + 1  # increase step counter
+                x_out = np.append(x_out, [x_1], axis=0)
+
+                step_g = step_g * 2
+                x_0 = x_1
+                g_0_normed = g_1_normed
+
+                x_1 = x_0 - g_0_normed * step_g  # advance x one step
+                g_1 = gradient_func(x_1)  # gradient at new point
+                g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+                g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+
+
+
+
+        if state == 1: # when we have pair for g and we are exploring in the directon of sum_g
+            print(t, "state 1")
+
+            x_1 = x_0 - g_1_0_sum_normed * step_sum  # advance x one step
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+            t = t + 1  # increase step counter
+            x_out = np.append(x_out, [x_1], axis=0)
+
+            g_1_10sum_sum = g_1_normed + g_1_0_sum_normed  # caculating the sum to check if they are pairs
+            g_1_10sum_sum_norm = np.linalg.norm(g_1_10sum_sum)  # norm of the gradient
+
+            x_2 = x_1 - g_1_normed * step_g  # advance x one step
+            g_2 = gradient_func(x_2)  # gradient at new point
+            g_2_norm = np.linalg.norm(g_2)  # norm of the gradient
+            g_2_normed = g_2 / g_2_norm  # normalized gradient
+
+            g_2_1_sum = g_2_normed + g_1_normed
+            g_2_1_sum_norm = np.linalg.norm(g_2_1_sum)  # norm of the gradient
+            g_2_1_sum_normed = g_2_1_sum / g_2_1_sum_norm  # normalized gradient
+
+            g_21sum_10sum_sum = g_2_1_sum_normed + g_1_0_sum_normed
+            g_21sum_10sum_sum_norm = np.linalg.norm(g_21sum_10sum_sum)  # norm of the gradient
+
+            if g_21sum_10sum_sum_norm < np.sqrt(2):  # we have a pair and we use smaller and smaller steps until we do not have a pair anymore
+                # undo move and half the step until tehre is no pair
+                # change the state to 1: until gave g pairs, explore sum_g direction
+                while g_21sum_10sum_sum_norm < np.sqrt(2):
+                    step_sum = step_sum * 0.5
+                    if step_sum < step_sum_min:
+                        print("t: step_sum < step_sum_min", t, step_sum, step_sum_min)
+                        state = 3
                         break
 
+                    x_1 = x_0 - g_1_0_sum_normed * step_sum  # advance x one step
+                    g_1 = gradient_func(x_1)  # gradient at new point
+                    g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                    g_1_normed = g_1 / g_1_norm  # normalized gradient
 
+                    g_1_10sum_sum = g_1_normed + g_1_0_sum_normed  # caculating the sum to check if they are pairs
+                    g_1_10sum_sum_norm = np.linalg.norm(g_1_10sum_sum)  # norm of the gradient
 
-            x_out = np.append(x_out, [x_1], axis=0)
-            t = t + 1  # increase step counter
+                    t = t + 1  # increase step counter
+                    x_out = np.append(x_out, [x_1], axis=0)
 
+                    g_1_10sum_sum = g_1_normed + g_1_0_sum_normed  # caculating the sum to check if they are pairs
+                    g_1_10sum_sum_norm = np.linalg.norm(g_1_10sum_sum)  # norm of the gradient
 
-        # Determining the next step
-        if case == "free run":
-            # dot product of gradient_1 and gradient_0
-            g_1_0_dot = np.dot(g_1_normed, g_0_normed)
-            if g_1_0_dot >= 0.0:
-                step_g = step_g * 2.0
+                    x_2 = x_1 - g_1_normed * step_g  # advance x one step
+                    g_2 = gradient_func(x_2)  # gradient at new point
+                    g_2_norm = np.linalg.norm(g_2)  # norm of the gradient
+                    g_2_normed = g_2 / g_2_norm  # normalized gradient
+
+                    g_2_1_sum = g_2_normed + g_1_normed
+                    g_2_1_sum_norm = np.linalg.norm(g_2_1_sum)  # norm of the gradient
+                    g_2_1_sum_normed = g_2_1_sum / g_2_1_sum_norm  # normalized gradient
+
+                    g_21sum_10sum_sum = g_2_1_sum_normed + g_1_0_sum_normed
+                    g_21sum_10sum_sum_norm = np.linalg.norm(g_21sum_10sum_sum)  # norm of the gradient
+
+                x_0 = x_1
+                g_0_normed = g_1_normed
+
+                x_1 = x_0 - g_0_normed * step_g  # advance x one step
+                g_1 = gradient_func(x_1)  # gradient at new point
+                g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+                g_1_0_sum = g_1_normed + g_0_normed
+                g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+                g_1_0_sum_normed = g_1_0_sum / g_1_0_sum_norm  # normalized gradient
+
+                if g_1_0_sum_norm < np.sqrt(2):
+                    state = 2
+                else:
+                    print("Reset from state 1 to 0.")
+                    step_g = l_rate
+                    state = 0
+
             else:
-                case == "pair g"
+                # continue with the next step as state
+                t = t + 1  # increase step counter
+                x_out = np.append(x_out, [x_1], axis=0)
+
+                step_sum = step_sum * 2
+                x_0 = x_1
+                g_0_normed = g_1_normed
+
+
+        if state == 2:  # when we have sum_g pairs (and of course g pairs) we are converging in the direction of sum and g one at a time
+            print(t, "state 2")
+
+            x_1 = x_0 - g_0_normed * step_g  # advance x one step
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+            g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+            g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+
+            t = t + 1  # increase step counter
+            x_out = np.append(x_out, [x_1], axis=0)
+
+            if g_1_0_sum_norm < np.sqrt(2):  # gradient pointing right at each other meaning a true minima
+                while g_1_0_sum_norm < np.sqrt(2):
+                    step_g = step_g * 0.5
+                    x_1 = x_0 - g_0_normed * step_g  # advance x one step
+                    g_1 = gradient_func(x_1)  # gradient at new point
+                    g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                    g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+                    g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+                    g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+
+                    t = t + 1  # increase step counter
+                    x_out = np.append(x_out, [x_1], axis=0)
+
+
+                x_0 = x_1
+                g_0_normed = g_1_normed
+
+            else:
+                # t = t + 1  # increase step counter
+                # x_out = np.append(x_out, [x_1], axis=0)
+
+                x_0 = x_1
+                g_0_normed = g_1_normed
+
+                print("Reset from state 2 to 0.")
+                step_g = l_rate
+                step_sum = l_rate
+                state = 0
+
+            x_1 = x_0 - g_1_0_sum_normed * step_sum  # advance x one step
+            g_1 = gradient_func(x_1)  # gradient at new point
+            g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+            g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+            g_1_10sum_sum = g_1_normed + g_1_0_sum_normed  # caculating the sum to check if they are pairs
+            g_1_10sum_sum_norm = np.linalg.norm(g_1_10sum_sum)  # norm of the gradient
+
+            if g_1_10sum_sum_norm < np.sqrt(2):  # we have a pair and we use smaller and smaller steps until we do not have a pair anymore
+                # undo move and half the step until tehre is no pair
+                # change the state to 1: until gave g pairs, explore sum_g direction
+                while g_1_10sum_sum_norm < np.sqrt(2):
+                    step_sum = step_sum * 0.5
+                    if step_sum < step_sum_min:
+                        print("t: step_sum < step_sum_min", t, step_sum, step_sum_min)
+                        state = 3
+                        break
+
+                    x_1 = x_0 - g_1_0_sum_normed * step_sum  # advance x one step
+                    g_1 = gradient_func(x_1)  # gradient at new point
+                    g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                    g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+                    g_1_10sum_sum = g_1_normed + g_1_0_sum_normed  # caculating the sum to check if they are pairs
+                    g_1_10sum_sum_norm = np.linalg.norm(g_1_10sum_sum)  # norm of the gradient
+
+                    t = t + 1  # increase step counter
+                    x_out = np.append(x_out, [x_1], axis=0)
+
+
+                x_0 = x_1
+                g_0_normed = g_1_normed
+
+
+    if state == 3:
+        print(t, "state 3")
+
+        x_1 = x_0 - g_0_normed * step_g  # advance x one step
+        g_1 = gradient_func(x_1)  # gradient at new point
+        g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+        g_1_normed = g_1 / g_1_norm  # normalized gradient
+
+        g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+        g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+
+        if g_1_0_sum_norm < np.sqrt(2):  # gradient pointing right at each other meaning a true minima
+            while g_1_0_sum_norm < np.sqrt(2):
                 step_g = step_g * 0.5
+                x_1 = x_0 - g_0_normed * step_g  # advance x one step
+                g_1 = gradient_func(x_1)  # gradient at new point
+                g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
+                g_1_normed = g_1 / g_1_norm  # normalized gradient
 
-        if case == "pair g":
-            #
-            # t = t + 1  # increase step counter
-            # x_1 = x_0 - g_0_normed * step_g
-            # g_1 = gradient_func(x_1)  # gradient at new point
-            # g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            # g_1_normed = g_1 / g_1_norm  # normalized gradient
-            #
-            # g_sum_1 = g_0_normed + g_s_normed
-            # g_sum_1_norm = np.linalg.norm(g_sum_1)  # norm of the gradient
-            # g_sum_1_normed = g_sum_1 / g_sum_1_norm  # normalized gradient
-            #
-            # x_0 = x_1
-            # g_0_normed = g_1_normed
-            # g_sum_0_normed = g_sum_1_normed
-            # x_out = np.append(x_out, [x_0], axis=0)
-            #
-            # t = t + 1  # increase step counter
-            # x_1 = x_0 - g_sum_0_normed * step_sum
-            # g_1 = gradient_func(x_1)  # gradient at new point
-            # g_1_norm = np.linalg.norm(g_1)  # norm of the gradient
-            # g_1_normed = g_1 / g_1_norm  # normalized gradient
-            #
-            # g_1_sum0_dot = np.dot(g_1_normed, g_sum_0_normed)
-            # g_sums_sum0_dot = np.dot(g_sum_s_normed, g_sum_0_normed)
-            # # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
-            # if g_1_sum0_dot < -1/np.sqrt(2) or g_sums_sum0_dot < 0 :
-            #     step_sum = step_sum * 0.5
-            # else:
-            #     step_sum = step_sum * 1.5
-            #
-            # x_0 = x_1
-            # g_0_normed = g_1_normed
-            # g_sum_s_normed = g_sum_0_normed
-            # x_out = np.append(x_out, [x_0], axis=0)
+                g_1_0_sum = g_1_normed + g_0_normed  # caculating the sum to check if they are pairs
+                g_1_0_sum_norm = np.linalg.norm(g_1_0_sum)  # norm of the gradient
+
+            t = t + 1  # increase step counter
+            x_out = np.append(x_out, [x_1], axis=0)
+
+            x_0 = x_1
+            g_0_normed = g_1_normed
+
+        else:
+            t = t + 1  # increase step counter
+            x_out = np.append(x_out, [x_1], axis=0)
+
+            x_0 = x_1
+            g_0_normed = g_1_normed
+
+            print("Reset from state 3 to 0.")
+            step_g = l_rate
+            step_sum = l_rate
+            state = 0
 
 
 
 
-
-
-
-
-
-
-
-
-        # save the points for graph and print progress
+    # save the points for graph and print progress
         c = max_iterations//tot_num_save
         c_1 = t % c
         if c_1 == 0:
@@ -1320,6 +1515,12 @@ def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, 
 
 
 
+
+
+write a function that does unit move along any direction that g has a component
+have an array of steps
+if one or more componenets are rejected half those until not rejeced
+alow some recovery of stepsize either by douling or reseting to l_rate
 
 
 
@@ -1394,7 +1595,7 @@ def MATYAS_grad(x):
 ############## Soft Max ###############
 rand.seed(2)
 n = 300
-d = 2
+d = 50
 total_C = 2
 
 # X = rand.randn(n, d)   #Let X be a random matrix
@@ -1446,7 +1647,7 @@ def softMax_main(x):
 
 
 # converging parameters
-max_iterations = 200 # maximum number of iterations
+max_iterations = 500 # maximum number of iterations
 tot_num_save = max_iterations # max(int(max_iterations/100), max_iterations)
 min_g = -1  # 0.0001   #minimum gradient
 
@@ -1472,14 +1673,15 @@ x_start = np.ones(d)
 
 # import time
 # rand.seed(int(time.time()))
-x_start = rand.randn(d)
+# x_start = rand.randn(d)
+x_start = np.ones(d)
 # x_start = np.array([-0.4, 0])
 # print(x_start)
 
 x_min = -0.2
-x_max = 0.1
-y_min = -0.25
-y_max = 0.15
+x_max = 1.2
+y_min = -0.2
+y_max = 1.2
 x_opt = 0
 y_opt = 0
 
@@ -1530,7 +1732,7 @@ y_opt = 0
 
 
 # applying gradient dhescent
-x_out_1, t_1 = gd_opt(x_start, func_grad, l_rate, max_iterations, min_g, tot_num_save)
+# x_out_1, t_1 = gd_opt(x_start, func_grad, l_rate, max_iterations, min_g, tot_num_save)
 # applying ADAM
 x_out_2, t_2 = adam_opt(x_start, func_grad, l_rate, epsilon, max_iterations, beta_1, beta_2, min_g, tot_num_save)
 # applying Bisection Gradient Descent
@@ -1612,7 +1814,7 @@ if d  == 2:
 # t_2_arr = np.array([i*max_iterations//100 for i in range(0, x_out_2.shape[0])])
 # t_3_arr = np.array([i*max_iterations//100 for i in range(0, x_out_3.shape[0])])
 
-t_1_arr = np.array([i for i in range(0, x_out_1.shape[0])])
+# t_1_arr = np.array([i for i in range(0, x_out_1.shape[0])])
 t_2_arr = np.array([i for i in range(0, x_out_2.shape[0])])
 t_3_arr = np.array([i for i in range(0, x_out_3.shape[0])])
 
@@ -1624,7 +1826,7 @@ ax2 = fig2.add_subplot(111)
 
 f3 = np.array([func_main(i) for i in x_out_3])
 f2 = np.array([func_main(i) for i in x_out_2])
-f1 = np.array([func_main(i) for i in x_out_1])
+# f1 = np.array([func_main(i) for i in x_out_1])
 
 # ax2.plot(t_1_arr,  f1, '.-', label='GD')
 ax2.plot(t_2_arr, f2, 'b.-', label='ADAM')
