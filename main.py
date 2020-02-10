@@ -1515,13 +1515,60 @@ def bisec_gd_opt_s9(x_start, gradient_func, l_rate, step_mult_max, max_iteration
 
 
 
+#
+#
+# write a function that does unit move along any direction that g has a component
+# have an array of steps
+# if one or more componenets are rejected half those until not rejeced
+# alow some recovery of stepsize either by douling or reseting to l_rate
+#
 
 
-write a function that does unit move along any direction that g has a component
-have an array of steps
-if one or more componenets are rejected half those until not rejeced
-alow some recovery of stepsize either by douling or reseting to l_rate
 
+
+
+
+
+
+
+
+def bisec_gd_opt(x_start, gradient_func, l_rate, step_mult_max, max_iterations, g_norm_min, tot_num_save):
+
+    # bisection gradient descent optimization function
+    d = len(x_start)
+    step = np.ones(d) * 0.1  # inital step (can be anything)
+
+    # put the initial point as the saved point
+
+    x_0 = x_start  # set x_0 to x_start
+    g_0 = gradient_func(x_0)  # gradient at new point
+    g_0_unit = np.sign(g_0)
+    t = 1  # set the counter
+    x_out = np.array([x_0])  # add to x_out array for graph
+
+    g_0_m1 = np.ones(len(x_start))
+
+    while t <= max_iterations:  # steps
+        x_1 = x_0 - g_0_unit * step  # advance x one step
+        g_1 = gradient_func(x_1)  # gradient at new point
+        g_1_unit = np.sign(g_1)
+        t = t + 1
+        x_out = np.append(x_out, [x_1], axis=0)
+
+
+        g_1_0 = g_1_unit * g_0_unit
+
+
+        step_mult = np.ones(d) * 2.0
+        step_mult = np.where(g_0_m1 == -1.0, 1.0, step_mult)
+        step_mult = np.where(g_1_0 == -1.0, 0.5, step_mult)
+        step = step * step_mult
+
+        x_0 = x_1
+        g_0_unit = g_1_unit
+        g_0_m1 = g_1_0
+
+    return x_out, t
 
 
 
@@ -1647,7 +1694,7 @@ def softMax_main(x):
 
 
 # converging parameters
-max_iterations = 500 # maximum number of iterations
+max_iterations = 3000 # maximum number of iterations
 tot_num_save = max_iterations # max(int(max_iterations/100), max_iterations)
 min_g = -1  # 0.0001   #minimum gradient
 
@@ -1687,7 +1734,7 @@ y_opt = 0
 
 
 
-
+#
 # # for this one enable the log plot below
 # d = 2
 # func_main = rosenbrock_main
@@ -1699,8 +1746,8 @@ y_opt = 0
 # y_max = 3.0
 # x_opt = 0
 # y_opt = 0
-
-
+#
+#
 
 # # for this one enable the normal (not log) plot below
 # func_main = EASOM_main
