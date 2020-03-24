@@ -217,6 +217,56 @@ def main():
 #    print(tt)
 #    sum(eig[eig<0])
 
+#
+# if __name__ == '__main__':
+#     main()
 
-if __name__ == '__main__':
-    main()
+
+
+############## Soft Max ###############
+rand.seed(2)
+n = 300
+d = 50
+def d_func():
+    return d
+total_C = 2
+
+# X = rand.randn(n, d)   #Let X be a random matrix
+
+A = rand.randn(n, d)
+D = np.logspace(1, 8, d)
+X = A*D  # set X as a ill conditioned Matrix
+
+
+I = np.eye(total_C, total_C - 1)
+ind = rand.randint(total_C, size=n)
+
+Y = I[ind, :]
+
+
+
+lamda = 1
+# reg = None
+
+
+def reg(x): return regConvex(x, lamda)
+
+
+# def reg(x): return regNonconvex(x, lamda)
+w = rand.randn(d*(total_C-1), 1)
+
+
+def fun(w): return softmax(X, Y, w, reg=reg)
+
+
+f, g, Hv = fun(w)
+
+
+def softMax_grad(x):
+    f, g, Hv = fun(x)
+    return g.T[0]
+
+
+def softMax_main(x):
+    f, g, Hv = fun(x)
+    return f[0][0]
