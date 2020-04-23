@@ -2,6 +2,7 @@ import numpy as np
 
 def optimiser_GD(x_start, gradient_func, max_iterations, tot_num_save):
     # gradient descent optimization function
+
     l_rate = 0.01
     x = x_start
     t = 1

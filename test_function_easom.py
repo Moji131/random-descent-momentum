@@ -1,10 +1,12 @@
 import math
 import numpy as np
 
+theta = 0 # to rotate the function around teh z axis
+pi = 3.14159265359
 
-def EASOM_main(x):
-    pi = 3.14159265359
-    theta = pi/4.0
+def easom_main(x):
+
+    # rotate function by theta
     x1 = x[0] * math.cos(theta) + x[1] * math.sin(theta)
     x2 = - x[0] * math.sin(theta) + x[1] * math.cos(theta)
 
@@ -14,10 +16,9 @@ def EASOM_main(x):
     return f
 
 
-def EASOM_grad(x):
+def easom_grad(x):
 
-    pi = 3.14159265359
-    theta = pi/4.0
+    # rotate function by theta
     x1 = x[0] * math.cos(theta) + x[1] * math.sin(theta)
     x2 = - x[0] * math.sin(theta) + x[1] * math.cos(theta)
 

@@ -6,7 +6,7 @@ def optimiser_ADAM(x_start, gradient_func, max_iterations, tot_num_save):
     beta_1 = 0.9
     beta_2 = 0.999
     epsilon = 1.0e-08
-    l_rate = 0.01
+    l_rate = 10
 
     x = x_start
     m = 0

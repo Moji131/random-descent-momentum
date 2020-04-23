@@ -1,9 +1,12 @@
 import math
 import numpy as np
 
-def MATYAS_main(x):
-    pi = 3.14159265359
-    theta = 0.1*pi/6.00
+pi = 3.14159265359
+theta = 0.1 * pi / 6.00 # to rotate the function around teh z axis
+
+def matyas_main(x):
+
+    # rotate function by theta
     x1 = x[0] * math.cos(theta) - x[1] * math.sin(theta)
     x2 = x[0] * math.sin(theta) + x[1] * math.cos(theta)
 
@@ -14,9 +17,9 @@ def MATYAS_main(x):
     return f
 
 
-def MATYAS_grad(x):
-    pi = 3.14159265359
-    theta = 0.1*pi/6.0
+def matyas_grad(x):
+
+    # rotate function by theta
     x1 = x[0] * math.cos(theta) - x[1] * math.sin(theta)
     x2 = x[0] * math.sin(theta) + x[1] * math.cos(theta)
 
