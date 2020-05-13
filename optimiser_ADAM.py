@@ -1,42 +1,40 @@
+
+
+
 import numpy as np
 
+class adam():
+    def __init__(self, params, lr=0.01):
 
-def optimiser_ADAM(x_start, gradient_func, max_iterations, tot_num_save):
-    # ADAM optimization function
-    beta_1 = 0.9
-    beta_2 = 0.999
-    epsilon = 1.0e-08
-    l_rate = 10
+        self.lr = lr
 
-    x = x_start
-    m = 0
-    v = 0
-    t = 1
+        self.d = len(params)
 
-    x_out = np.array([x])
+        self.x = np.zeros(self.d)
+        self.g = np.zeros(self.d)
 
-    #g = gradient_func(x)
-    # while np.sum(g) > 0.001:
-    while t <= max_iterations:
-        g = gradient_func(x)
-
-        m = beta_1 * m + (1 - beta_1) * g
-        v = beta_2 * v + (1 - beta_2) * np.power(g, 2)
-        m_hat = m / (1 - beta_1**t)
-        v_hat = v / (1 - beta_2**t)
-        x = x - (l_rate * m_hat) / (np.sqrt(v_hat) + epsilon)
-        # x_out = np.append(x_out, [x], axis=0)
-        t = t+1
+        ##### initialising parameters specific to the algorithm #######
+        exec(open("./optimiser_ADAM_init.py").read())
 
 
-        # prints progress and saves the point
-        c = max_iterations//tot_num_save
-        c_1 = t % c
-        if c_1 == 0:
-            # add to x_out array for graph
-            x_out = np.append(x_out, [x], axis=0)
-            # print("Adam %: ", int((t-1)/max_iterations*100))
 
-    return x_out, t-1
+    def _update_params(self):
+        beta_1 = 0.9
+        beta_2 = 0.999
+        epsilon = 1.0e-08
+
+        self.m = beta_1 * self.m + (1 - beta_1) * self.g
+        self.v = beta_2 * self.v + (1 - beta_2) * np.power(self.g, 2)
+        m_hat = self.m / (1 - beta_1**self.t)
+        v_hat = self.v / (1 - beta_2**self.t)
+        self.x = self.x - (self.lr * m_hat) / (np.sqrt(v_hat) + epsilon)
+
+
+
+    def step(self, closure = None):
+        self._update_params()
+
+
+
 
 

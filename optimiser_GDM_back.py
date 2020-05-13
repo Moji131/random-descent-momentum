@@ -4,27 +4,27 @@ import math
 
 
 
-def optimiser_NAGD(x_start, gradient_func, max_iterations, tot_num_save):
+def optimiser_GDM(x_start, gradient_func, max_iterations, tot_num_save):
 # Nesterov accelerated gradient descent function
 
-    alpha = 0.001
+    lr = 1
+    momentum = 0
+    d = len(x_start)
 
-    x_prev = x_start
-    g = gradient_func(x_prev)
+    x = x_start
+    g = gradient_func(x_start)
 
 
     t = 1
     x_out = np.array([x_start])
-    x = x_prev
+
+    v = np.zeros(d)
 
     while t <= max_iterations:
 
-        gamma = 1 - 3 / (5 + t)
-
-        y = x +  (x - x_prev) * (t-1) / (t+2)
-        g = gradient_func(y)
-        x_prev = x
-        x = y - alpha * g
+        g = gradient_func(x)
+        v = momentum * v +  lr * g
+        x = x - v
 
         t = t + 1
 
