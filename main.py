@@ -7,6 +7,9 @@ import math
 from numpy.linalg import norm
 import numpy.random as rand
 
+from cycler import cycler
+
+
 
 
 ########### Optimiser functions ###########################
@@ -40,9 +43,9 @@ from optimiser_GDM import gdm
 # x_start = np.zeros(d)
 # x_start = np.ones(d)*1.2
 #
-# x_min = -1
+# x_min = -1.5
 # x_max = 1.3
-# y_min = -1
+# y_min = -1.5
 # y_max = 1.3
 # x_opt = 0
 # y_opt = 0
@@ -58,13 +61,13 @@ from optimiser_GDM import gdm
 from test_function_rosenbrock import rosenbrock_main as func_main
 from test_function_rosenbrock import rosenbrock_grad as func_grad
 
-x_start = np.array([1, 2.5])
+x_start = np.array([1, 1.5])
 d = 2
 
-x_min = -2.0
-x_max = 2.0
-y_min = -1.0
-y_max = 3.0
+x_min = -0.2
+x_max = 1.5
+y_min = -0.5
+y_max = 2.0
 x_opt = 0
 y_opt = 0
 log_plot = True
@@ -76,12 +79,12 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 
 # from test_function_easom import easom_main as func_main
 # from test_function_easom import easom_grad as func_grad
-# x_start = np.array([2.2, 2.2])
+# x_start = np.array([3.14 - 2, 3.14 - 2])
 # d = 2
-# x_min = 3.14 - 2
-# x_max = 3.14 + 2
-# y_min = 3.14 - 2
-# y_max = 3.14 + 2
+# x_min = 3.14 - 5
+# x_max = 3.14 + 5
+# y_min = 3.14 - 5
+# y_max = 3.14 + 5
 #
 # x_opt = 3.1416080159444633
 # y_opt = 3.1416080159444633
@@ -91,20 +94,19 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 
 
 
-#########  MATYAS test function  #################
-#
+#########  Quadratic test function  #################
+
 # from test_function_matyas import matyas_main as func_main
 # from test_function_matyas import matyas_grad as func_grad
 # d = 2
-# x_start = np.array([50, 5000])
-# # x_start = np.array([400, 5])
+# x_start = np.array([50, 50])
 # x_min = -200.0
 # x_max = 220.0
 # y_min = -5000.0
 # y_max = 5500.0
 # log_plot = True
-# convergence_plt_title = "Convergence - MATYAS Function"
-# trajectory_plt_title = "Trajectories - MATYAS Function"
+# convergence_plt_title = "Convergence - Quadratic Function"
+# trajectory_plt_title = "Trajectories - Quadratic Function"
 
 
 
@@ -113,10 +115,11 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 ####################################################################
 
 ### parameters
-max_iterations = 30 # maximum number of iterations
 opt_n = 6 # number of optimizers defined
 opt_list = range(opt_n) # list of optimizers in use
-opt_list = [0,3,4,5]
+opt_list = [0,1,3,4,5]
+# opt_list = [0,3,4]
+# opt_list = [3]
 
 ### defining lists to hold parameters for diffrent optmizers
 lr = [ 0 for i in range(opt_n)]
@@ -147,10 +150,10 @@ closure_list[0] = None
 
 
 ### Creating ABGDv object
-lr[1] = 0.1
+lr[1] = 0.011
 name[1] = "ABGDv"
 optimizer[1] = abgd_v(x_start, lr=lr[1])
-optimizer[1].x = x_start
+optimizer[1].x =  x_start
 label[1] = name[1] + " lr=" + str(lr[1])
 x_out[1] = [x_start]
 t_out[1] = [0]
@@ -158,7 +161,7 @@ closure_list[1] = None
 
 
 ### Creating ABGDcm object
-lr[2] = 0.1
+lr[2] = 1
 name[2] = "ABGDcm"
 optimizer[2] = abgd_cm(x_start, lr=lr[2])
 optimizer[2].x = x_start
@@ -170,9 +173,11 @@ closure_list[2] = None
 
 
 ### Creating ABGDvmd object
-lr[3] = 0.1
+lr[3] = 0.01
 name[3] = "ABGDvmd"
-optimizer[3] = abgd_vmd(x_start, lr=lr[3])
+momentum = 0.6
+drift = True
+optimizer[3] = abgd_vmd(x_start, lr=lr[3], momentum=momentum, drift=drift)
 optimizer[3].x = x_start
 label[3] = name[3] + " lr=" + str(lr[3])
 x_out[3] = [x_start]
@@ -198,8 +203,8 @@ t_out[4] = [0]
 closure_list[4] = None
 
 
-### Creating ADAM object
-lr[5] = 0.0001
+### Creating GDM object
+lr[5] = 1e-4
 name[5] = "GDM"
 optimizer[5] = gdm(x_start, lr=lr[5])
 optimizer[5].x = x_start
@@ -215,6 +220,10 @@ closure_list[5] = None
 
 ############## Running optimizers #################
 ###################################################
+
+max_iterations = 31 #maximum number of iterations
+
+
 for t in range(1,max_iterations):
     print(t)
 
@@ -245,9 +254,12 @@ if d  == 2:
             f[ix, iy ] = func_main(np.array([mx[ix, iy], my[ix, iy]]))
 
 
+
     # drawing contour plot of the function
     fig1 = plt.figure(1)
     ax1 = fig1.add_subplot(111)
+    prop_cycle = (cycler('color', ['b', 'y', 'k', 'r', 'c', 'm']))
+    ax1.set_prop_cycle(prop_cycle)
     cmap = plt.get_cmap('seismic')
     if log_plot:
         cs = ax1.contourf(mx, my, np.log10(f), 100, cmap=cmap) #enable this for Rosenbrock function
@@ -276,6 +288,9 @@ if d  == 2:
 # ploting the convergence graph
 fig2 = plt.figure(2)
 ax2 = fig2.add_subplot(111)
+
+prop_cycle=(cycler('color', ['b', 'y', 'k', 'r', 'c', 'm' ]))
+ax2.set_prop_cycle(prop_cycle)
 
 for i_opt in opt_list:
     f1 = np.array([func_main(x_i) for x_i in x_out[i_opt]])

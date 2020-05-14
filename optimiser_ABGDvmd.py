@@ -1,7 +1,7 @@
 import numpy as np
 
 class abgd_vmd():
-    def __init__(self, params, lr=0.01, min_step_r=2**10, max_step_r=2**10, momentum = 0.9, drift= True):
+    def __init__(self, params, lr=0.01, min_step_r=2**10, max_step_r=2**10, momentum = 0.7, drift= True):
 
         self.lr = lr # learning rate
 
@@ -13,6 +13,8 @@ class abgd_vmd():
 
         ##### initialising parameters specific to the algorithm #######
         exec(open("./optimiser_ABGDvmd_init.py").read())
+
+
 
 
 
@@ -49,6 +51,9 @@ class abgd_vmd():
 
             # self.convrge_state_m1 = self.convrge_state
 
+        if self.step_g > self.step_g_r * self.lr:
+            self.step_g = self.step_g_r * self.lr
+
 
         ###### Drift section ##########
 
@@ -72,6 +77,11 @@ class abgd_vmd():
                 else:
                     self.step_drift = self.step_drift * 2.0
 
+
+                if self.step_drift > self.step_drift_r * self.lr:
+                    self.step_drift = self.step_drift_r * self.lr
+
+
                 x_save = self.x
                 self.x = self.x - g_drift_0_normed * self.step_drift
 
@@ -80,7 +90,7 @@ class abgd_vmd():
                 g_norm = np.linalg.norm(self.g)
                 g_normed = self.g / g_norm
                 g_drift_dot = np.dot(g_drift_0_normed, g_normed)
-                if g_drift_dot < self.drift_reject_con or g_drift_dot > self.drift_reject_con:
+                if g_drift_dot > self.drift_reject_con:
                     self.g_drift_m1_normed = g_drift_0_normed
                     self.g_drift_0_m1_dot_m1 = g_drift_0_m1_dot
                     drift_update = True

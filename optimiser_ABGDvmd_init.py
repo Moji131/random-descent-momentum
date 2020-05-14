@@ -19,7 +19,7 @@ self.pair_con = 0 # the value of dot product that under that is considered a a p
 
 self.drift_con = -0.95 # the value of the dot product of gradient that lower than that activates the drift move
 self.drift = drift # Boolean for doing or not doing the drift move
-self.drift_reject_con = -0.5 # value of dot product of drift and new gradient that lower than that rejects the move and undoes the drift move
+self.drift_reject_con = -0.3 # value of dot product of drift and new gradient that lower than that rejects the move and undoes the drift move
 
 # self.g_drift_0_m1_dot = 1 # dot product of drift and the previous gradient
 self.g_drift_0_m1_dot_m1 = 1  # dot product of the drift and the previous gradient for the -1 step
@@ -40,4 +40,5 @@ else:
 
 
 
-
+self.step_g_r = 2**5
+self.step_drift_r = 2**5

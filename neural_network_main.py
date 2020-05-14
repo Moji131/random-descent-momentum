@@ -23,46 +23,46 @@ from neural_network_ABGDvmd import abgd_vmd
 
 ###### random data #########
 
-# N = 40
-# D_in, H1, D_out = 6, 16, 1
-#
-# # Create random Tensors to hold inputs and outputs
-# torch.manual_seed(0)
-# x_train = torch.randn(N, D_in)
-# y_train = torch.randn(N, D_out)
+N = 30
+D_in, H1, D_out = 6, 30, 1
 
-# test_con = False
+# Create random Tensors to hold inputs and outputs
+torch.manual_seed(0)
+x_train = torch.randn(N, D_in)
+y_train = torch.randn(N, D_out)
+
+test_con = False
 
 ########## MNIST load #########
-
-transform = transforms.ToTensor()
-train_set = datasets.MNIST("data/mnist/trainset", transform=transform, download=True)
-test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
-train_loader = DataLoader(train_set, batch_size=len(train_set))
-test_loader = DataLoader(test_set, batch_size=len(test_set))
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-train_inputs, train_targets = iter(train_loader).next()
-train_inputs = train_inputs.reshape(60000, 784).to(device)
-train_targets = train_targets.reshape(60000,-1).to(device)
-
-test_inputs, test_targets = iter(test_loader).next()
-test_inputs = test_inputs.reshape(10000, 784).to(device)
-test_targets = test_targets.reshape(10000,-1).to(device)
-
-n_train =60000
-x_train = train_inputs[0:n_train,:]
-y_train = train_targets[0:n_train].float()
-
-n_test =10000
-x_test = test_inputs[0:n_test,:]
-y_test = test_targets[0:n_test].float()
-
-# D_in is input dimension; Hs are hidden dimensions; D_out is output dimension.
-D_in, H1, D_out = 784, 20, 1
-
-test_con = True
+#
+# transform = transforms.ToTensor()
+# train_set = datasets.MNIST("data/mnist/trainset", transform=transform, download=True)
+# test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
+# train_loader = DataLoader(train_set, batch_size=len(train_set))
+# test_loader = DataLoader(test_set, batch_size=len(test_set))
+#
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#
+# train_inputs, train_targets = iter(train_loader).next()
+# train_inputs = train_inputs.reshape(60000, 784).to(device)
+# train_targets = train_targets.reshape(60000,-1).to(device)
+#
+# test_inputs, test_targets = iter(test_loader).next()
+# test_inputs = test_inputs.reshape(10000, 784).to(device)
+# test_targets = test_targets.reshape(10000,-1).to(device)
+#
+# n_train =60000
+# x_train = train_inputs[0:n_train,:]
+# y_train = train_targets[0:n_train].float()
+#
+# n_test =10000
+# x_test = test_inputs[0:n_test,:]
+# y_test = test_targets[0:n_test].float()
+#
+# # D_in is input dimension; Hs are hidden dimensions; D_out is output dimension.
+# D_in, H1, D_out = 784, 20, 1
+#
+# test_con = True
 
 
 
@@ -73,8 +73,8 @@ test_con = True
 
 opt_n = 6 # number of optimizers
 model = [0 for i in range(opt_n)] # list of models to be used with optimizers
-# opt_list = range(opt_n) # list of active optimizers
-opt_list = [0,3,4]
+opt_list = range(opt_n) # list of active optimizers
+opt_list = [0,1,3,4,5]
 
 model_o = torch.nn.Sequential(
     torch.nn.Linear(D_in, H1),
@@ -106,10 +106,10 @@ closure_list = [ 0 for i in range(opt_n)]
 
 
 ###########  ABGDc #############
-lr[0] = 1e-2
+lr[0] = 1e-3
 name[0] = "ABGDc lr=" + str(lr[0])
 drift=True
-optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0])
+optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0], min_step_r=2**5, max_step_r=2**5 )
 
 #### defining the function to reevalute function and gradient if needed
 closure_list[0] = None
@@ -126,7 +126,7 @@ closure_list[1] = None
 
 
 ###########  ABGDcm #############
-lr[2] = 1e-3
+lr[2] = 1e-2
 name[2] = "ABGDcm lr=" + str(lr[2])
 drift=True
 optimizer[2] = abgd_cm(model[2].parameters(), lr=lr[2])
@@ -136,10 +136,11 @@ closure_list[2] = None
 
 
 ###########  ABGDvdm #############
-lr[3] = 1e-1
-name[3] = "ABGDvdm lr=" + str(lr[3])
-drift=True
-optimizer[3] = abgd_vmd(model[3].parameters(), lr=lr[3])
+lr[3] = 1e-2
+name[3] = "ABGDvmd lr=" + str(lr[3])
+momentum = 0.7
+drift = True
+optimizer[3] = abgd_vmd(model[3].parameters(), lr=lr[3], momentum=momentum, drift=drift)
 
 #### defining the function to reevalute function and gradient if needed
 def closure():
@@ -163,7 +164,7 @@ closure_list[4] = None
 
 
 # ###### SGDM ##################
-lr[5] = 1e-5
+lr[5] = 1e-3
 name[5] = "SGDM lr=" + str(lr[5])
 momentum = 0.9
 optimizer[5] = torch.optim.SGD(model[5].parameters(), lr=lr[5], momentum=momentum)
@@ -197,8 +198,8 @@ file = [ 0 for i in range(opt_n)]
 ################################
 
 save_count = 1
-print_count = 1
-epochs = 100
+print_count = 10
+epochs = 150
 
 
 

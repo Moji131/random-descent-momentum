@@ -9,7 +9,7 @@ import optimiser_ABGDvmd
 
 
 class abgd_vmd(torch.optim.Optimizer):
-    def __init__(self, params, lr=0.01, min_step_r=2**10, max_step_r=2**10, momentum = 0.9, drift= True):
+    def __init__(self, params, lr=0.01, min_step_r=2**10, max_step_r=2**10, momentum = 0.7, drift= True):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
