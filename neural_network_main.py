@@ -1,4 +1,4 @@
-import torch
+import torch  ### go to https://pytorch.org/ for installation command 
 import torch.nn as nn
 import torchvision
 from torch.utils.data import DataLoader
@@ -242,12 +242,16 @@ closure_list[5] = None
 ######  creating files to output data ########
 ##############################################
 path = "outputs/neural_network/train"
+if not os.path.exists(path):
+    os.makedirs(path)
 files = os.listdir(path)
 for f in files:
     file_path = path + "/" + f
     os.remove(file_path)
 path = "outputs/neural_network/test"
 files = os.listdir(path)
+if not os.path.exists(path):
+    os.makedirs(path)
 for f in files:
     file_path = path + "/" + f
     os.remove(file_path)
