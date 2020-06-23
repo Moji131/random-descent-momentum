@@ -17,7 +17,7 @@ from cycler import cycler
 
 from optimiser_ABGDc import abgd_c
 from optimiser_ABGDv import abgd_v
-from optimiser_ABGDcm import abgd_cm
+from optimiser_ABGDcs import abgd_cs
 from optimiser_ABGDvmd import abgd_vmd
 from optimiser_ADAM import adam
 from optimiser_GDM import gdm
@@ -32,48 +32,48 @@ from optimiser_GDM import gdm
 ############ Softmax test funcion ###############
 # To change the input data of the softmax regression go to test_function_softmax.py
 
-#
-# from test_function_softmax import softMax_main as func_main
-# from test_function_softmax import softMax_grad as func_grad
-# from test_function_softmax import d_func
-# from test_function_softmax import description_func
-# d = d_func()
-#
+
+from test_function_softmax import softMax_main as func_main
+from test_function_softmax import softMax_grad as func_grad
+from test_function_softmax import d_func
+from test_function_softmax import description_func
+d = d_func()
+
 # x_start = np.random.randint(2, size=d)
 # x_start = np.zeros(d)
-# x_start = np.ones(d)*1.2
-#
-# x_min = -1.5
-# x_max = 1.3
-# y_min = -1.5
-# y_max = 1.3
-# x_opt = 0
-# y_opt = 0
-#
-# log_plot = False
-# description = description_func()
-# convergence_plt_title = "Convergence - " + description
-# trajectory_plt_title = "Trajectories - " + description
+x_start = np.ones(d)*1.05
+
+x_min = -1.5
+x_max = 1.3
+y_min = -1.5
+y_max = 1.3
+x_opt = 0
+y_opt = 0
+
+log_plot = False
+description = description_func()
+convergence_plt_title = "Convergence - " + description
+trajectory_plt_title = "Trajectories - " + description
 
 
 #########  Rosenbrock test function  #################
-
-from test_function_rosenbrock import rosenbrock_main as func_main
-from test_function_rosenbrock import rosenbrock_grad as func_grad
-
-x_start = np.array([1, 1.5])
-d = 2
-
-x_min = -0.2
-x_max = 1.5
-y_min = -0.5
-y_max = 2.0
-x_opt = 0
-y_opt = 0
-log_plot = True
-convergence_plt_title = "Convergence - Rosenbrock Function"
-trajectory_plt_title = "Trajectories - Rosenbrock Function"
-
+#
+# from test_function_rosenbrock import rosenbrock_main as func_main
+# from test_function_rosenbrock import rosenbrock_grad as func_grad
+#
+# x_start = np.array([1, 1.5])
+# d = 2
+#
+# x_min = -0.2
+# x_max = 1.5
+# y_min = -0.5
+# y_max = 2.0
+# x_opt = 0
+# y_opt = 0
+# log_plot = True
+# convergence_plt_title = "Convergence - Rosenbrock Function"
+# trajectory_plt_title = "Trajectories - Rosenbrock Function"
+#
 
 #########  easom test function  #################
 
@@ -95,7 +95,7 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 
 
 #########  Quadratic test function  #################
-
+#
 # from test_function_matyas import matyas_main as func_main
 # from test_function_matyas import matyas_grad as func_grad
 # d = 2
@@ -107,7 +107,7 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 # log_plot = True
 # convergence_plt_title = "Convergence - Quadratic Function"
 # trajectory_plt_title = "Trajectories - Quadratic Function"
-
+#
 
 
 
@@ -116,10 +116,8 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 
 ### parameters
 opt_n = 6 # number of optimizers defined
-opt_list = range(opt_n) # list of optimizers in use
-opt_list = [0,1,3,4,5]
-# opt_list = [0,3,4]
-# opt_list = [3]
+# opt_list = [0,1,2,3,4,5] # list optimizers to be applied
+opt_list = [0,2]
 
 ### defining lists to hold parameters for diffrent optmizers
 lr = [ 0 for i in range(opt_n)]
@@ -137,7 +135,7 @@ closure_list = [ 0 for i in range(opt_n)]
 ####################################################################
 
 ##### Creating ABGDc object
-lr[0] = 0.1
+lr[0] = 0.01
 name[0] = "ABGDc"
 optimizer[0] = abgd_c(x_start, lr=lr[0])
 optimizer[0].x = x_start
@@ -150,7 +148,7 @@ closure_list[0] = None
 
 
 ### Creating ABGDv object
-lr[1] = 0.011
+lr[1] = 0.001
 name[1] = "ABGDv"
 optimizer[1] = abgd_v(x_start, lr=lr[1])
 optimizer[1].x =  x_start
@@ -160,29 +158,35 @@ t_out[1] = [0]
 closure_list[1] = None
 
 
-### Creating ABGDcm object
-lr[2] = 1
-name[2] = "ABGDcm"
-optimizer[2] = abgd_cm(x_start, lr=lr[2])
+### Creating ABGDcs object
+lr[2] = 0.001
+name[2] = "ABGDcs"
+optimizer[2] = abgd_cs(x_start, lr=lr[2])
 optimizer[2].x = x_start
 label[2] = name[2] + " lr=" + str(lr[2])
 x_out[2] = [x_start]
 t_out[2] = [0]
 #defining the function to reevalute function and gradient if needed
 closure_list[2] = None
+# defining the function to reevalute function and gradient if needed
+def closure():
+    optimizer[2].g = func_grad(optimizer[2].x)
+    loss = func_main(optimizer[2].x)
+    return loss
+closure_list[2] = closure
+
 
 
 ### Creating ABGDvmd object
 lr[3] = 0.01
 name[3] = "ABGDvmd"
-momentum = 0.6
+momentum = 0.7
 drift = True
 optimizer[3] = abgd_vmd(x_start, lr=lr[3], momentum=momentum, drift=drift)
 optimizer[3].x = x_start
 label[3] = name[3] + " lr=" + str(lr[3])
 x_out[3] = [x_start]
 t_out[3] = [0]
-
 # defining the function to reevalute function and gradient if needed
 def closure():
     optimizer[3].g = func_grad(optimizer[3].x)
@@ -204,7 +208,7 @@ closure_list[4] = None
 
 
 ### Creating GDM object
-lr[5] = 1e-4
+lr[5] = 0.001
 name[5] = "GDM"
 optimizer[5] = gdm(x_start, lr=lr[5])
 optimizer[5].x = x_start
@@ -221,7 +225,7 @@ closure_list[5] = None
 ############## Running optimizers #################
 ###################################################
 
-max_iterations = 31 #maximum number of iterations
+max_iterations = 100 #maximum number of iterations
 
 
 for t in range(1,max_iterations):
@@ -234,6 +238,7 @@ for t in range(1,max_iterations):
         optimizer[opt_i].step(closure_list[opt_i])
         x_out[opt_i] = np.append(x_out[opt_i], [optimizer[opt_i].x], axis=0)
         t_out[opt_i] = np.append(t_out[opt_i], [t], axis=0)
+
 
 
 
@@ -300,5 +305,6 @@ for i_opt in opt_list:
 plt.title(convergence_plt_title)
 plt.xlabel("steps")
 plt.ylabel("function value")
+# ax2.set_ylim(-130, 530)
 legend = ax2.legend()
 plt.show()

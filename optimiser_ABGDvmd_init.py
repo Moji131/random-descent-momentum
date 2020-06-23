@@ -12,7 +12,7 @@ self.g_0_mom_dot_m1 = 1 # dot product of momentum with gradient in the -1 step
 
 self.g_drift__m1_normed = np.zeros(self.d) # drift in the previous drift step
 
-self.g_m1_normed = 0 # gradient normalised
+self.g_m1_normed = np.zeros(self.d) # gradient normalised
 
 
 self.pair_con = 0 # the value of dot product that under that is considered a a pair of gradients pointing at each other
@@ -20,14 +20,9 @@ self.pair_con = 0 # the value of dot product that under that is considered a a p
 self.drift_con = -0.95 # the value of the dot product of gradient that lower than that activates the drift move
 self.drift = drift # Boolean for doing or not doing the drift move
 self.drift_reject_con = -0.3 # value of dot product of drift and new gradient that lower than that rejects the move and undoes the drift move
-
-# self.g_drift_0_m1_dot = 1 # dot product of drift and the previous gradient
+self.g_drift_m1_normed = np.zeros(self.d) # drift vector normalised for the previous step
 self.g_drift_0_m1_dot_m1 = 1  # dot product of the drift and the previous gradient for the -1 step
 
-self.g_drift_m1_normed = np.zeros(self.d) # drift vector normalised for the prvious step
-
-# self.convrge_state = False
-# self.convrge_state_m1 = False
 
 
 # momentum value. Turns momentum off if it is not above zero and under one
@@ -39,6 +34,6 @@ else:
     self.beta = 0
 
 
-
-self.step_g_r = 2**5
-self.step_drift_r = 2**5
+#
+# self.step_g_r = 2**5
+# self.step_drift_r = 2**5

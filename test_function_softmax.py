@@ -33,7 +33,6 @@ def softmax(X, Y, w, arg=None, reg=None, HProp=None, gProp=None):
 
 
     w = w.reshape(d*C, 1)  # [d*C x 1]
-
     W = w.reshape(C, d).T  # [d x C]
 
 
@@ -112,33 +111,33 @@ def softmax(X, Y, w, arg=None, reg=None, HProp=None, gProp=None):
 ############## selection of data source ###############
 #######################################################
 
-# ############## This section for random data generation ###############
-rand.seed(3)
-n = 30
-d = 2
-total_C = 2
-# X = rand.randn(n, d)   #Let X be a random matrix
-A = rand.randn(n, d)
-cond_number = 6
-D = np.logspace(1, cond_number, d)
-X = A*D  # set X as a ill conditioned Matrix
-I = np.eye(total_C, total_C - 1)
-ind = rand.randint(total_C, size=n)
-Y = I[ind, :]
-description = "Softmax - Random Data, d=" + str(d) + ", n=" + str(n) + ", \n condition number = " + str(cond_number)
-
+############## This section for random data generation ###############
+# rand.seed(3)
+# n = 300
+# d = 50
+# total_C = 2
+# # X = rand.randn(n, d)   #Let X be a random matrix
+# A = rand.randn(n, d)
+# cond_number = 6
+# D = np.logspace(1, cond_number, d)
+# X = A*D  # set X as a ill conditioned Matrix
+# I = np.eye(total_C, total_C - 1)
+# ind = rand.randint(total_C, size=n)
+# Y = I[ind, :]
+# description = "Softmax - Random Data, d=" + str(d) + ", n=" + str(n) + ", \n condition number = " + str(cond_number)
+#
 
 
 
 ########### This section for loading MNIST ############
 
-
+#
 # import tensorflow as tf
-from torchvision import datasets, transforms
-import torch
-from torch.utils.data import DataLoader
-transform = transforms.ToTensor()
-
+# from torchvision import datasets, transforms
+# import torch
+# from torch.utils.data import DataLoader
+# transform = transforms.ToTensor()
+#
 # d = 784
 # total_C = 10
 # n = 784
@@ -210,6 +209,7 @@ lamda = 1
 # reg = None
 def reg(x): return regConvex(x, lamda)
 # def reg(x): return regNonconvex(x, lamda)
+
 
 w = rand.randn(d*(total_C-1), 1)
 def fun(w): return softmax(X, Y, w, reg=reg)
