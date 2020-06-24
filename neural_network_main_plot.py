@@ -33,8 +33,7 @@ plt.title("Neural Network Convergence - train")
 plt.xlabel("steps")
 plt.ylabel("loss")
 legend = plt.legend()
-ax1.set_xlim(-1, 40)
-ax1.set_ylim(0, 2000000)
+
 
 
 
