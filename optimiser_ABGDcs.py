@@ -14,7 +14,7 @@ class abgd_cs():
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDc_init.py").read())
+        exec(open("./optimiser_ABGDcs_init.py").read())
 
 
 
