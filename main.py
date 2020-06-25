@@ -21,6 +21,16 @@ from optimiser_ABGDcs import abgd_cs
 from optimiser_ABGDvmd import abgd_vmd
 from optimiser_ADAM import adam
 from optimiser_GDM import gdm
+from optimiser_ABGDcsd import abgd_csd
+
+
+### parameters
+opt_n = 7 # number of optimizers defined
+# opt_list = [0,1,2,3,4,5] # list optimizers to be applied
+# opt_list = [0,2,4,6]
+opt_list = [2,6]
+
+max_iterations = 130 #maximum number of iterations
 
 
 
@@ -33,47 +43,47 @@ from optimiser_GDM import gdm
 # To change the input data of the softmax regression go to test_function_softmax.py
 
 
-from test_function_softmax import softMax_main as func_main
-from test_function_softmax import softMax_grad as func_grad
-from test_function_softmax import d_func
-from test_function_softmax import description_func
-d = d_func()
-
-# x_start = np.random.randint(2, size=d)
-# x_start = np.zeros(d)
-x_start = np.ones(d)*1.05
-
-x_min = -1.5
-x_max = 1.3
-y_min = -1.5
-y_max = 1.3
-x_opt = 0
-y_opt = 0
-
-log_plot = False
-description = description_func()
-convergence_plt_title = "Convergence - " + description
-trajectory_plt_title = "Trajectories - " + description
+# from test_function_softmax import softMax_main as func_main
+# from test_function_softmax import softMax_grad as func_grad
+# from test_function_softmax import d_func
+# from test_function_softmax import description_func
+# d = d_func()
+#
+# # x_start = np.random.randint(2, size=d)
+# # x_start = np.zeros(d)
+# x_start = np.ones(d)*1.05
+#
+# x_min = -1.5
+# x_max = 1.3
+# y_min = -1.5
+# y_max = 1.3
+# x_opt = 0
+# y_opt = 0
+#
+# log_plot = False
+# description = description_func()
+# convergence_plt_title = "Convergence - " + description
+# trajectory_plt_title = "Trajectories - " + description
 
 
 #########  Rosenbrock test function  #################
-#
-# from test_function_rosenbrock import rosenbrock_main as func_main
-# from test_function_rosenbrock import rosenbrock_grad as func_grad
-#
-# x_start = np.array([1, 1.5])
-# d = 2
-#
-# x_min = -0.2
-# x_max = 1.5
-# y_min = -0.5
-# y_max = 2.0
-# x_opt = 0
-# y_opt = 0
-# log_plot = True
-# convergence_plt_title = "Convergence - Rosenbrock Function"
-# trajectory_plt_title = "Trajectories - Rosenbrock Function"
-#
+
+from test_function_rosenbrock import rosenbrock_main as func_main
+from test_function_rosenbrock import rosenbrock_grad as func_grad
+
+x_start = np.array([1, 1.5])
+d = 2
+
+x_min = -0.2
+x_max = 1.5
+y_min = -0.5
+y_max = 2.0
+x_opt = 0
+y_opt = 0
+log_plot = True
+convergence_plt_title = "Convergence - Rosenbrock Function"
+trajectory_plt_title = "Trajectories - Rosenbrock Function"
+
 
 #########  easom test function  #################
 
@@ -95,15 +105,15 @@ trajectory_plt_title = "Trajectories - " + description
 
 
 #########  Quadratic test function  #################
-#
+
 # from test_function_matyas import matyas_main as func_main
 # from test_function_matyas import matyas_grad as func_grad
 # d = 2
-# x_start = np.array([50, 50])
+# x_start = np.array([50, 1000])
 # x_min = -200.0
 # x_max = 220.0
-# y_min = -5000.0
-# y_max = 5500.0
+# y_min = -100.0
+# y_max = 1200.0
 # log_plot = True
 # convergence_plt_title = "Convergence - Quadratic Function"
 # trajectory_plt_title = "Trajectories - Quadratic Function"
@@ -114,10 +124,6 @@ trajectory_plt_title = "Trajectories - " + description
 ################# preperaing optimiser objects #####################
 ####################################################################
 
-### parameters
-opt_n = 6 # number of optimizers defined
-# opt_list = [0,1,2,3,4,5] # list optimizers to be applied
-opt_list = [0,2]
 
 ### defining lists to hold parameters for diffrent optmizers
 lr = [ 0 for i in range(opt_n)]
@@ -159,7 +165,7 @@ closure_list[1] = None
 
 
 ### Creating ABGDcs object
-lr[2] = 0.001
+lr[2] = 0.01
 name[2] = "ABGDcs"
 optimizer[2] = abgd_cs(x_start, lr=lr[2])
 optimizer[2].x = x_start
@@ -219,13 +225,27 @@ t_out[5] = [0]
 closure_list[5] = None
 
 
-
+### Creating ABGDcsd object
+lr[6] = 0.01
+name[6] = "ABGDcsd"
+optimizer[6] = abgd_csd(x_start, lr=lr[6])
+optimizer[6].x = x_start
+label[6] = name[6] + " lr=" + str(lr[6])
+x_out[6] = [x_start]
+t_out[6] = [0]
+#defining the function to reevalute function and gradient if needed
+closure_list[6] = None
+# defining the function to reevalute function and gradient if needed
+def closure():
+    optimizer[6].g = func_grad(optimizer[6].x)
+    loss = func_main(optimizer[6].x)
+    return loss
+closure_list[6] = closure
 
 
 ############## Running optimizers #################
 ###################################################
 
-max_iterations = 100 #maximum number of iterations
 
 
 for t in range(1,max_iterations):
