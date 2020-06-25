@@ -12,18 +12,19 @@ import numpy as np
 from neural_network_ABGDc import abgd_c
 from neural_network_ABGDv import abgd_v
 from neural_network_ABGDcs import abgd_cs
+from neural_network_ABGDcsd import abgd_csd
 from neural_network_ABGDvmd import abgd_vmd
 
 
 
 ############ settings #######################
-opt_n = 6 # number of optimizers
+opt_n = 7 # number of optimizers
 model = [0 for i in range(opt_n)] # list of models to be used with optimizers
-opt_list = [0,1,2,3,4,5] # list of active optimizers
-
-save_count = 1
+opt_list = [0,1,2,3,4,5,6] # list of active optimizers
+# opt_list = [0,2,4,6]
+save_count = 5
 print_count = 10
-epochs = 30
+epochs = 1000
 
 
 
@@ -34,11 +35,11 @@ epochs = 30
 
 ###### random data #########
 
-# N = 30
-# D_in, H1, D_out = 6, 30, 1
+# N = 500
+# D_in, H1, D_out = 8, 36, 1
 #
 # # Create random Tensors to hold inputs and outputs
-# torch.manual_seed(0)
+# torch.manual_seed(2)
 # x_train = torch.randn(N, D_in)
 # y_train = torch.randn(N, D_out)
 #
@@ -109,7 +110,7 @@ y_test = test_targets[0:n_test].float()
 # D_in is input dimension; Hs are hidden dimensions; D_out is output dimension.
 D_in, H1, D_out = 3072, 20, 1
 
-test_con = False
+test_con = True
 
 
 
@@ -199,7 +200,7 @@ closure_list[2] = closure
 
 
 
-###########  ABGDvdm #############
+###########  ABGDvmd #############
 lr[3] = 1e-2
 name[3] = "ABGDvmd lr=" + str(lr[3])
 momentum = 0.7
@@ -236,6 +237,23 @@ optimizer[5] = torch.optim.SGD(model[5].parameters(), lr=lr[5], momentum=momentu
 closure_list[5] = None
 
 
+###########  ABGDcsd #############
+lr[6] = 1e-3
+name[6] = "ABGDcsd lr=" + str(lr[6])
+drift=True
+optimizer[6] = abgd_csd(model[6].parameters(), lr=lr[6])
+
+#### defining the function to reevalute function and gradient if needed
+def closure():
+    optimizer[6].np_to_params()
+    optimizer[6].zero_grad()
+    y_pred = model[6](x_train)
+    loss = loss_fn(y_pred, y_train)
+    loss.backward()
+    optimizer[6].params_to_np()
+    return loss
+closure = torch.enable_grad()(closure)
+closure_list[6] = closure
 
 
 
