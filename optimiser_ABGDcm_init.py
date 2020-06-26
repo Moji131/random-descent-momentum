@@ -10,4 +10,15 @@ self.g_m1_sign = np.ones(self.d)  # get the sign of the components
 self.g_0_m_m1 = np.ones(self.d)
 self.g_m1_m2 = np.ones(self.d)
 
+self.v = np.ones(self.d)
+
+
+self.v = np.ones(self.d)
 self.m = np.zeros(self.d)
+
+self.stop_count = np.zeros(self.d)
+self.m_max = 3
+self.converge = np.zeros(self.d)
+self.converge_count = np.zeros(self.d)
+self.g_m1_sign = np.ones(self.d)
+self.g_0_sign = np.ones(self.d)

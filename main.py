@@ -22,15 +22,14 @@ from optimiser_ABGDvmd import abgd_vmd
 from optimiser_ADAM import adam
 from optimiser_GDM import gdm
 from optimiser_ABGDcsd import abgd_csd
+from optimiser_ABGDcm import abgd_cm
 
 
 ### parameters
-opt_n = 7 # number of optimizers defined
-# opt_list = [0,1,2,3,4,5] # list optimizers to be applied
-# opt_list = [0,2,4,6]
-opt_list = [2,6]
+opt_n = 8 # number of optimizers defined
+opt_list = [0,1,2,3,4,5,6] # list optimizers to be applied
 
-max_iterations = 130 #maximum number of iterations
+max_iterations = 100 # maximum number of iterations
 
 
 
@@ -42,7 +41,7 @@ max_iterations = 130 #maximum number of iterations
 ############ Softmax test funcion ###############
 # To change the input data of the softmax regression go to test_function_softmax.py
 
-
+#
 # from test_function_softmax import softMax_main as func_main
 # from test_function_softmax import softMax_grad as func_grad
 # from test_function_softmax import d_func
@@ -109,11 +108,11 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 # from test_function_matyas import matyas_main as func_main
 # from test_function_matyas import matyas_grad as func_grad
 # d = 2
-# x_start = np.array([50, 1000])
-# x_min = -200.0
+# x_start = np.array([50, 200])
+# x_min = -220.0
 # x_max = 220.0
-# y_min = -100.0
-# y_max = 1200.0
+# y_min = -220.0
+# y_max = 220
 # log_plot = True
 # convergence_plt_title = "Convergence - Quadratic Function"
 # trajectory_plt_title = "Trajectories - Quadratic Function"
@@ -241,6 +240,26 @@ def closure():
     loss = func_main(optimizer[6].x)
     return loss
 closure_list[6] = closure
+
+
+
+### Creating ABGDcm object
+lr[7] = 0.01
+name[7] = "ABGDcm"
+optimizer[7] = abgd_cm(x_start, lr=lr[7])
+optimizer[7].x = x_start
+label[7] = name[7] + " lr=" + str(lr[7])
+x_out[7] = [x_start]
+t_out[7] = [0]
+#defining the function to reevalute function and gradient if needed
+closure_list[7] = None
+# defining the function to reevalute function and gradient if needed
+def closure():
+    optimizer[7].g = func_grad(optimizer[7].x)
+    loss = func_main(optimizer[7].x)
+    return loss
+closure_list[7] = closure
+
 
 
 ############## Running optimizers #################

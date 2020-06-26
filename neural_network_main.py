@@ -150,11 +150,11 @@ lr = [ 0 for i in range(opt_n)]
 name = [ 0 for i in range(opt_n)]
 optimizer = [ 0 for i in range(opt_n)]
 
-loss_train = [ 0 for i in range(opt_n)]
-y_pred_train = [ 0 for i in range(opt_n)]
+# loss_train = [ 0 for i in range(opt_n)]
+# y_pred_train = [ 0 for i in range(opt_n)]
 
-loss_test = [ 0 for i in range(opt_n)]
-y_pred_test = [ 0 for i in range(opt_n)]
+# loss_test = [ 0 for i in range(opt_n)]
+# y_pred_test = [ 0 for i in range(opt_n)]
 
 closure_list = [ 0 for i in range(opt_n)]
 
@@ -267,9 +267,9 @@ for f in files:
     file_path = path + "/" + f
     os.remove(file_path)
 path = "outputs/neural_network/test"
-files = os.listdir(path)
 if not os.path.exists(path):
     os.makedirs(path)
+files = os.listdir(path)
 for f in files:
     file_path = path + "/" + f
     os.remove(file_path)
@@ -291,24 +291,24 @@ for t in range(epochs):
     for opt_i in opt_list:
 
         # Forward pass: compute predicted y by passing x to the model.
-        y_pred_train[opt_i] = model[opt_i](x_train)
+        y_pred_train = model[opt_i](x_train)
 
         # Compute and print loss.
-        loss_train[opt_i] = loss_fn(y_pred_train[opt_i], y_train)
+        loss_train = loss_fn(y_pred_train, y_train)
 
         if test_con:
-            y_pred_test[opt_i] = model[opt_i](x_test)
-            loss_test[opt_i] = loss_fn(y_pred_test[opt_i], y_test)
+            y_pred_test = model[opt_i](x_test)
+            loss_test = loss_fn(y_pred_test, y_test)
 
         if t % save_count == 0:
             file[opt_i] = open('outputs/neural_network/train/' + name[opt_i], 'a')
-            str_to_file = str(t) + "\t" + str(loss_train[opt_i].item()) + "\n"
+            str_to_file = str(t) + "\t" + str(loss_train.data) + "\n"
             file[opt_i].write(str_to_file)
             file[opt_i].close()
 
             if test_con:
                 file[opt_i] = open('outputs/neural_network/test/' + name[opt_i], 'a')
-                str_to_file = str(t) + "\t" + str(loss_test[opt_i].item()) + "\n"
+                str_to_file = str(t) + "\t" + str(loss_test.data) + "\n"
                 file[opt_i].write(str_to_file)
                 file[opt_i].close()
 
@@ -317,7 +317,7 @@ for t in range(epochs):
         optimizer[opt_i].zero_grad()
 
         # Backward pass: compute gradient of the loss with respect to model parameters
-        loss_train[opt_i].backward()
+        loss_train.backward()
 
         # Calling the step function on an Optimizer makes an update to its parameters
         optimizer[opt_i].step(closure=closure_list[opt_i])
