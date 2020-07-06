@@ -22,9 +22,9 @@ opt_n = 7 # number of optimizers
 model = [0 for i in range(opt_n)] # list of models to be used with optimizers
 opt_list = [0,1,2,3,4,5,6] # list of active optimizers
 # opt_list = [0,2,4,6]
-save_count = 5
-print_count = 10
-epochs = 1000
+save_count = 1
+print_count = 1
+epochs = 10
 
 
 
@@ -302,13 +302,13 @@ for t in range(epochs):
 
         if t % save_count == 0:
             file[opt_i] = open('outputs/neural_network/train/' + name[opt_i], 'a')
-            str_to_file = str(t) + "\t" + str(loss_train.data) + "\n"
+            str_to_file = str(t) + "\t" + str(loss_train.data.item()) + "\n"
             file[opt_i].write(str_to_file)
             file[opt_i].close()
 
             if test_con:
                 file[opt_i] = open('outputs/neural_network/test/' + name[opt_i], 'a')
-                str_to_file = str(t) + "\t" + str(loss_test.data) + "\n"
+                str_to_file = str(t) + "\t" + str(loss_test.data.item()) + "\n"
                 file[opt_i].write(str_to_file)
                 file[opt_i].close()
 

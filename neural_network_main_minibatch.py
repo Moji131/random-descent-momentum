@@ -20,11 +20,11 @@ from neural_network_ABGDvmd import abgd_vmd
 ############ settings #######################
 opt_n = 7 # number of optimizers
 model = [0 for i in range(opt_n)] # list of models to be used with optimizers
-opt_list = [0,1,2,3,4,5,6] # list of active optimizers
+opt_list = [0,1,2,3,4,5] # list of active optimizers
 # opt_list = [0,2,4,6]
-save_count = 5
-print_count = 10
-epochs = 1000
+save_count = 1
+print_count = 1
+epochs = 20
 
 
 
@@ -84,28 +84,28 @@ epochs = 1000
 ########## CIFAR10 load #########
 
 transform = transforms.ToTensor()
-train_set = datasets.CIFAR10("data/CIFAR10/trainset", transform=transform, download=True, batch_size=100, shuffle=True)
-test_set = datasets.CIFAR10("data/CIFAR10/testset", transform=transform, train=False, download=True)
-train_loader = DataLoader(train_set, batch_size=len(train_set))
-test_loader = DataLoader(test_set, batch_size=len(test_set))
+train_set = datasets.CIFAR10("data/CIFAR10/trainset", transform=transform, download=True)
+test_set = datasets.CIFAR10("data/CIFAR10/testset", train=False, transform=transform, download=True)
+train_loader = DataLoader(train_set, batch_size=100)
+test_loader = DataLoader(test_set, batch_size=100)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # train_inputs, train_targets = iter(train_loader).next()
-# train_inputs = train_inputs.reshape(50000,3072).to(device)
-# train_targets = train_targets.reshape(50000,-1).to(device)
+# train_inputs = train_inputs.reshape(100,3072).to(device)
+# train_targets = train_targets.reshape(100,-1).to(device)
+# #
+# test_inputs, test_targets = iter(test_loader).next()
+# test_inputs = test_inputs.reshape(100,3072).to(device)
+# test_targets = test_targets.reshape(100,-1).to(device)
 #
-test_inputs, test_targets = iter(test_loader).next()
-test_inputs = test_inputs.reshape(10000,3072).to(device)
-test_targets = test_targets.reshape(10000,-1).to(device)
-
 # n_train =50000
 # x_train = train_inputs[0:n_train,:]
 # y_train = train_targets[0:n_train].float()
-#
-n_test =1000
-x_test = test_inputs[0:n_test,:]
-y_test = test_targets[0:n_test].float()
+# #
+# n_test =10000
+# x_test = test_inputs[0:n_test,:]
+# y_test = test_targets[0:n_test].float()
 
 # D_in is input dimension; Hs are hidden dimensions; D_out is output dimension.
 D_in, H1, D_out = 3072, 20, 1
@@ -160,7 +160,7 @@ closure_list = [ 0 for i in range(opt_n)]
 
 
 ###########  ABGDc #############
-lr[0] = 1e-3
+lr[0] = 1e-2
 name[0] = "ABGDc lr=" + str(lr[0])
 drift=True
 optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0], min_step_r=2**5, max_step_r=2**5 )
@@ -170,7 +170,7 @@ closure_list[0] = None
 
 
 ###########  ABGDv #############
-lr[1] = 1e-2
+lr[1] = 1e-1
 name[1] = "ABGDv lr=" + str(lr[1])
 drift=True
 optimizer[1] = abgd_v(model[1].parameters(), lr=lr[1])
@@ -180,7 +180,7 @@ closure_list[1] = None
 
 
 ###########  ABGDcs #############
-lr[2] = 1e-3
+lr[2] = 1e-2
 name[2] = "ABGDcs lr=" + str(lr[2])
 drift=True
 optimizer[2] = abgd_cs(model[2].parameters(), lr=lr[2])
@@ -201,7 +201,7 @@ closure_list[2] = closure
 
 
 ###########  ABGDvmd #############
-lr[3] = 1e-2
+lr[3] = 1e-1
 name[3] = "ABGDvmd lr=" + str(lr[3])
 momentum = 0.7
 drift = True
@@ -229,7 +229,7 @@ closure_list[4] = None
 
 
 # ###### GD ##################
-lr[5] = 1e-8
+lr[5] = 1e-5
 name[5] = "GD lr=" + str(lr[5])
 momentum = 0.9
 optimizer[5] = torch.optim.SGD(model[5].parameters(), lr=lr[5], momentum=momentum)
@@ -283,12 +283,33 @@ file = [ 0 for i in range(opt_n)]
 ######### main loop ############
 ################################
 
-
+t2 = 0
 
 for t in range(epochs):
-    for i, (x_train, y_train) in enumerate(train_loader):
+    for i, (x, y) in enumerate(train_loader):
+
+        train_inputs, train_targets = iter(train_loader).next()
+        train_inputs = train_inputs.reshape(100, 3072).to(device)
+        train_targets = train_targets.reshape(100, -1).to(device)
+
+        n_train = 100
+        x_train = train_inputs[0:n_train, :]
+        y_train = train_targets[0:n_train].float()
+
+
+        test_inputs, test_targets = iter(test_loader).next()
+        test_inputs = test_inputs.reshape(100, 3072).to(device)
+        test_targets = test_targets.reshape(100, -1).to(device)
+
+
+        n_test = 100
+        x_test =  test_inputs[0:n_test, :]
+        y_test = test_targets[0:n_test].float()
+
 
         for opt_i in opt_list:
+
+
 
             # Forward pass: compute predicted y by passing x to the model.
             y_pred_train = model[opt_i](x_train)
@@ -300,15 +321,15 @@ for t in range(epochs):
                 y_pred_test = model[opt_i](x_test)
                 loss_test = loss_fn(y_pred_test, y_test)
 
-            if t % save_count == 0:
+            if t2 % save_count == 0:
                 file[opt_i] = open('outputs/neural_network/train/' + name[opt_i], 'a')
-                str_to_file = str(t) + "\t" + str(loss_train.data) + "\n"
+                str_to_file = str(t2) + "\t" + str(loss_train.data.item()) + "\n"
                 file[opt_i].write(str_to_file)
                 file[opt_i].close()
 
                 if test_con:
                     file[opt_i] = open('outputs/neural_network/test/' + name[opt_i], 'a')
-                    str_to_file = str(t) + "\t" + str(loss_test.data) + "\n"
+                    str_to_file = str(t2) + "\t" + str(loss_test.data.item()) + "\n"
                     file[opt_i].write(str_to_file)
                     file[opt_i].close()
 
@@ -322,7 +343,9 @@ for t in range(epochs):
             # Calling the step function on an Optimizer makes an update to its parameters
             optimizer[opt_i].step(closure=closure_list[opt_i])
 
-        if t % print_count == 0:
-            print("progress:", t , " of ", epochs )
+        t2=t2+1
+
+        if t2 % print_count == 0:
+            print("progress:", t2 , " of ", "??"  )
 
 import neural_network_main_plot
