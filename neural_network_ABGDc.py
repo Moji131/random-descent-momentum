@@ -49,10 +49,21 @@ class abgd_c(torch.optim.Optimizer):
             if d_tensor == 1:
                 for i in range(p.size()[0]):
                     self.d = self.d + 1
+            elif d_tensor == 2:
+                for i in range(p.size()[0]):
+                    for j in range(p.size()[1]):
+                        self.d = self.d + 1
+            elif d_tensor == 3:
+                for i in range(p.size()[0]):
+                    for j in range(p.size()[1]):
+                        for k in range(p.size()[2]):
+                            self.d = self.d + 1
             else:
                 for i in range(p.size()[0]):
-                    for i in range(p.size()[1]):
-                        self.d = self.d + 1
+                    for j in range(p.size()[1]):
+                        for k in range(p.size()[2]):
+                            for l in range(p.size()[3]):
+                                self.d = self.d + 1
 
     def params_to_np(self):
         n = 0
@@ -62,11 +73,26 @@ class abgd_c(torch.optim.Optimizer):
                 for i in p:
                     self.x[n] = i.data.item()
                     n = n + 1
-            else:
+            elif d == 2:
                 for i in p:
                     for j in i:
                         self.x[n] = j.data.item()
                         n = n + 1
+            elif d ==3:
+                for i in p:
+                    for j in i:
+                        for k in j:
+                            print(k.data)
+                            print(d)
+                            self.x[n] = k.data.item()
+                            n = n + 1
+            elif d == 4:
+                for i in p:
+                    for j in i:
+                        for k in j:
+                            for l in k:
+                                self.x[n] = l.data.item()
+                                n = n + 1
 
         n = 0
         for p in self._params:
@@ -75,11 +101,25 @@ class abgd_c(torch.optim.Optimizer):
                 for i in p.grad:
                     self.g[n] = i.data.item()
                     n = n + 1
-            else:
+            elif d ==2:
                 for i in p.grad:
                     for j in i:
                         self.g[n] = j.data.item()
                         n = n + 1
+            elif d == 3:
+                for i in p.grad:
+                    for j in i:
+                        for k in j:
+                            self.g[n] = k.data.item()
+                            n = n + 1
+            else:
+                for i in p.grad:
+                    for j in i:
+                        for k in j:
+                            for l in k:
+                                self.g[n] = l.data.item()
+                                n = n + 1
+
 
 
     def np_to_params(self):
@@ -91,11 +131,24 @@ class abgd_c(torch.optim.Optimizer):
                 for i in range(p.size()[0]):
                     p.data[i] = self.x[n]
                     n = n + 1
-            else:
+            elif d == 2:
                 for i in range(p.size()[0]):
                     for j in range(p.size()[1]):
                         p[i,j] = self.x[n]
                         n = n + 1
+            elif d == 3:
+                for i in range(p.size()[0]):
+                    for j in range(p.size()[1]):
+                        for k in range(p.size()[2]):
+                            p[i,j,k] = self.x[n]
+                            n = n + 1
+            else:
+                for i in range(p.size()[0]):
+                    for j in range(p.size()[1]):
+                        for k in range(p.size()[2]):
+                            for l in range(p.size()[3]):
+                                p[i,j,k, l] = self.x[n]
+                                n = n + 1
             with torch.enable_grad():
                 q = p
 
