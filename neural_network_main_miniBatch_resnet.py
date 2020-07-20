@@ -24,9 +24,9 @@ from resnet import *
 ############ settings #######################
 opt_n = 7  # number of optimizers
 model = [0 for i in range(opt_n)]  # list of models to be used with optimizers
-opt_list = [0, 1, 2, 3, 4, 5]  # list of active optimizers
+opt_list = [0, 1, 3, 4, 5]  # list of active optimizers
 # opt_list = [0,2,4,6]
-# opt_list = [0]
+# opt_list = [4]
 save_count = 1
 print_count = 1
 epochs = 20
@@ -98,8 +98,8 @@ test_set = datasets.CIFAR10("data/CIFAR10/testset",
                             train=False, transform=transform, download=True)
 
 
-train_loader = DataLoader(train_set, batch_size=100, shuffle=True)
-test_loader = DataLoader(test_set, batch_size=100, shuffle=False)
+train_loader = DataLoader(train_set, batch_size=5000, shuffle=True)
+test_loader = DataLoader(test_set, batch_size=5000, shuffle=False)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -142,11 +142,14 @@ test_con = False
 # torchvision.ResNet()
 # model_o = torchvision.models.resnet34()
 
-model_o = ResNet(ResidualBlock, [2, 2, 2]).to(device) # Resnet structure from resnet.py
+model_o = ResNet(ResidualBlock, [2, 2, 2]).to(
+    device)  # Resnet structure from resnet.py
 
 
 #########
-loss_fn = torch.nn.MSELoss(reduction='sum')  # selecting loss function
+# loss_fn = torch.nn.MSELoss(reduction='sum')  # selecting loss function
+loss_fn = torch.nn.CrossEntropyLoss()  # selecting loss function
+
 for opt_i in range(opt_n):
     # Use the nn package to define a model for each optimizer
     model[opt_i] = copy.deepcopy(model_o)
@@ -170,7 +173,7 @@ closure_list = [0 for i in range(opt_n)]
 
 
 ###########  ABGDc #############
-lr[0] = 1e-2
+lr[0] = 1e-3
 name[0] = "ABGDc lr=" + str(lr[0])
 drift = True
 optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0],
@@ -181,7 +184,7 @@ closure_list[0] = None
 
 
 ###########  ABGDv #############
-lr[1] = 1e-1
+lr[1] = 1e-2
 name[1] = "ABGDv lr=" + str(lr[1])
 drift = True
 optimizer[1] = abgd_v(model[1].parameters(), lr=lr[1])
@@ -214,7 +217,7 @@ closure_list[2] = closure
 
 
 ###########  ABGDvmd #############
-lr[3] = 1e-1
+lr[3] = 1e-2
 name[3] = "ABGDvmd lr=" + str(lr[3])
 momentum = 0.7
 drift = True
@@ -246,7 +249,7 @@ closure_list[4] = None
 
 
 # ###### GD ##################
-lr[5] = 1e-5
+lr[5] = 1e-2
 name[5] = "GD lr=" + str(lr[5])
 momentum = 0.9
 optimizer[5] = torch.optim.SGD(
@@ -256,7 +259,7 @@ closure_list[5] = None
 
 
 ###########  ABGDcsd #############
-lr[6] = 1e-3
+lr[6] = 1e-4
 name[6] = "ABGDcsd lr=" + str(lr[6])
 drift = True
 optimizer[6] = abgd_csd(model[6].parameters(), lr=lr[6])
@@ -308,23 +311,23 @@ for t in range(epochs):
 
         train_inputs, train_targets = iter(train_loader).next()
         # train_inputs = train_inputs.reshape(100, 3072).to(device)
-        train_targets = train_targets.reshape(100, -1).to(device)
+        # train_targets = train_targets.reshape(100, -1).to(device)
         train_inputs = train_inputs.to(device)
         train_targets = train_targets.to(device)
 
-        n_train = 100
+        n_train = 5000
         x_train = train_inputs[0:n_train, :]
-        y_train = train_targets[0:n_train].float()
+        y_train = train_targets[0:n_train]  # .float()
 
         test_inputs, test_targets = iter(test_loader).next()
         # test_inputs = test_inputs.reshape(100, 3072).to(device)
-        test_targets = test_targets.reshape(100, -1).to(device)
+        # test_targets = test_targets.reshape(100, -1).to(device)
         test_inputs = test_inputs.to(device)
         test_targets = test_targets.to(device)
 
-        n_test = 100
+        n_test = 5000
         x_test = test_inputs[0:n_test, :]
-        y_test = test_targets[0:n_test].float()
+        y_test = test_targets[0:n_test]  # .float()
 
         for opt_i in opt_list:
 
