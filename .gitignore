@@ -1,8 +1,6 @@
 <<<<<<< HEAD
-/outputs/*
-/data/*
-=======
 /outputs/
 /data/
+/__pycache__/
 
 >>>>>>> resnet minibatch
