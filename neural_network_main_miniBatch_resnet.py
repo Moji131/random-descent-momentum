@@ -15,22 +15,20 @@ from neural_network_ABGDv import abgd_v
 from neural_network_ABGDcs import abgd_cs
 from neural_network_ABGDcsd import abgd_csd
 from neural_network_ABGDvmd import abgd_vmd
-
+from neural_network_ABGDcm import abgd_cm
 
 from resnet import *
 # https://pytorch-tutorial.readthedocs.io/en/latest/tutorial/chapter03_intermediate/3_2_2_cnn_resnet_cifar10/
 
 
 ############ settings #######################
-opt_n = 7  # number of optimizers
+opt_n = 8  # number of optimizers
 model = [0 for i in range(opt_n)]  # list of models to be used with optimizers
-opt_list = [0, 1, 2, 3, 4, 5]  # list of active optimizers
-# opt_list = [0,2,4,6]
-# opt_list = [4]
+opt_list = [0,4, 7]  # list of active optimizers
 save_count = 1
 print_count = 1
 epochs = 200
-
+batch_size = 100
 
 ############ Data load #######################
 ##############################################
@@ -97,7 +95,6 @@ train_set = datasets.CIFAR10(
 test_set = datasets.CIFAR10("data/CIFAR10/testset",
                             train=False, transform=transform, download=True)
 train_szie = 50000
-batch_size = 100
 train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
@@ -162,40 +159,28 @@ for opt_i in range(opt_n):
 lr = [0 for i in range(opt_n)]
 name = [0 for i in range(opt_n)]
 optimizer = [0 for i in range(opt_n)]
-
-
-# loss_train = [ 0 for i in range(opt_n)]
-# y_pred_train = [ 0 for i in range(opt_n)]
-
-# loss_test = [ 0 for i in range(opt_n)]
-# y_pred_test = [ 0 for i in range(opt_n)]
-
 closure_list = [0 for i in range(opt_n)]
 
 
 ###########  ABGDc #############
 lr[0] = 1e-3
 name[0] = "ABGDc lr=" + str(lr[0])
-drift = True
-optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0],
-                      min_step_r=2**5, max_step_r=2**5)
-
+optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0])
 # defining the function to reevalute function and gradient if needed
 closure_list[0] = None
 
 
 ###########  ABGDv #############
-lr[1] = 1e-4
+lr[1] = 1e-2
 name[1] = "ABGDv lr=" + str(lr[1])
 drift = True
 optimizer[1] = abgd_v(model[1].parameters(), lr=lr[1])
-
 # defining the function to reevalute function and gradient if needed
 closure_list[1] = None
 
 
 ###########  ABGDcs #############
-lr[2] = 1e-4
+lr[2] = 1e-3
 name[2] = "ABGDcs lr=" + str(lr[2])
 drift = True
 optimizer[2] = abgd_cs(model[2].parameters(), lr=lr[2])
@@ -218,7 +203,7 @@ closure_list[2] = closure
 
 
 ###########  ABGDvmd #############
-lr[3] = 1e-4
+lr[3] = 1e-2
 name[3] = "ABGDvmd lr=" + str(lr[3])
 momentum = 0.7
 drift = True
@@ -250,7 +235,7 @@ closure_list[4] = None
 
 
 # ###### GD ##################
-lr[5] = 1e-2
+lr[5] = 1e-1
 name[5] = "GD lr=" + str(lr[5])
 momentum = 0.9
 optimizer[5] = torch.optim.SGD(
@@ -280,6 +265,15 @@ def closure():
 
 closure = torch.enable_grad()(closure)
 closure_list[6] = closure
+
+
+###########  ABGDcm #############
+lr[7] = 1e-3
+name[7] = "ABGDcm lr=" + str(lr[7])
+optimizer[7] = abgd_cm(model[7].parameters(), lr=lr[7])
+
+# defining the function to reevalute function and gradient if needed
+closure_list[0] = None
 
 
 ######  creating files to output data ########
