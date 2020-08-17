@@ -4,17 +4,17 @@ import copy
 from torch.autograd import Variable
 import copy
 
-import optimiser_ABGDv
+import optimiser_ADAM
 
 
 
-class abgd_v(torch.optim.Optimizer):
+class adam(torch.optim.Optimizer):
     def __init__(self, params, lr=0.01):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
         defaults = dict(lr=lr)
-        super(abgd_v, self).__init__(params, defaults)
+        super(adam, self).__init__(params, defaults)
         self._params = self.param_groups[0]['params']
 
         self.lr = lr
@@ -26,9 +26,10 @@ class abgd_v(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDv_init.py").read())
+        exec(open("./optimiser_adam_init.py").read())
 
-    _update_params = optimiser_ABGDv.abgd_v._update_params
+    _update_params = optimiser_ADAM.adam._update_params
+
 
 
 

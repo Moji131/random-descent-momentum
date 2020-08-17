@@ -111,21 +111,21 @@ def softmax(X, Y, w, arg=None, reg=None, HProp=None, gProp=None):
 ############## selection of data source ###############
 #######################################################
 
-############## This section for random data generation ###############
-# rand.seed(3)
-# n = 300
-# d = 50
-# total_C = 2
-# # X = rand.randn(n, d)   #Let X be a random matrix
-# A = rand.randn(n, d)
-# cond_number = 6
-# D = np.logspace(1, cond_number, d)
-# X = A*D  # set X as a ill conditioned Matrix
-# I = np.eye(total_C, total_C - 1)
-# ind = rand.randint(total_C, size=n)
-# Y = I[ind, :]
-# description = "Softmax - Random Data, d=" + str(d) + ", n=" + str(n) + ", \n condition number = " + str(cond_number)
-#
+############# This section for random data generation ###############
+rand.seed(3)
+n = 300
+d = 50
+total_C = 2
+# X = rand.randn(n, d)   #Let X be a random matrix
+A = rand.randn(n, d)
+cond_number = 6
+D = np.logspace(1, cond_number, d)
+X = A*D  # set X as a ill conditioned Matrix
+I = np.eye(total_C, total_C - 1)
+ind = rand.randint(total_C, size=n)
+Y = I[ind, :]
+description = "Softmax - Random Data, d=" + str(d) + ", n=" + str(n) + ", \n condition number = " + str(cond_number)
+
 
 
 
@@ -171,8 +171,8 @@ def softmax(X, Y, w, arg=None, reg=None, HProp=None, gProp=None):
 # y_test = test_targets[0:n_test].float()
 #
 # description = "Softmax - MNIST, d=" + str(d) + ", n=" + str(n)
-
-
+#
+#
 
 ############ This section for loading CIFAR10 ############
 

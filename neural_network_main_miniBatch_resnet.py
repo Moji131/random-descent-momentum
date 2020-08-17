@@ -10,11 +10,6 @@ import pickle
 import os
 import numpy as np
 
-from neural_network_ABGDc import abgd_c
-from neural_network_ABGDv import abgd_v
-from neural_network_ABGDcs import abgd_cs
-from neural_network_ABGDcsd import abgd_csd
-from neural_network_ABGDvmd import abgd_vmd
 
 
 from resnet import *
@@ -22,14 +17,16 @@ from resnet import *
 
 
 ############ settings #######################
-opt_n = 7  # number of optimizers
-model = [0 for i in range(opt_n)]  # list of models to be used with optimizers
-opt_list = [0, 1, 2, 3, 4, 5]  # list of active optimizers
+opt_n = 9
+#    [0    , 1    , 2    , 3   , 4      , 5      , 6     , 7           , 8          ]
+#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy]
+lr = [0.1  , 0.1  , 1e-2 , 1e-5, 0.1    , 1e-1   , 1e-2  , 1e-2         , 1e-4        ]
+opt_list = [2,6,7]  # list of active optimizers
 # opt_list = [0,2,4,6]
 # opt_list = [4]
 save_count = 1
 print_count = 1
-epochs = 200
+epochs = 300
 
 
 ############ Data load #######################
@@ -43,8 +40,8 @@ epochs = 200
 #
 # # Create random Tensors to hold inputs and outputs
 # torch.manual_seed(2)
-# train_inputs = torch.randn(N, D_in)
-# train_targets = torch.randn(N, D_out)
+# x_train = torch.randn(N, D_in)
+# y_train = torch.randn(N, D_out)
 #
 # test_con = False
 
@@ -60,17 +57,17 @@ epochs = 200
 #
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #
-# train_inputs, train_targets = iter(train_loader).next()
-# train_inputs = train_inputs.reshape(60000, 784).to(device)
-# train_targets = train_targets.reshape(60000,-1).to(device)
+# x_train, y_train = iter(train_loader).next()
+# x_train = x_train.reshape(60000, 784).to(device)
+# y_train = y_train.reshape(60000,-1).to(device)
 #
 # test_inputs, test_targets = iter(test_loader).next()
 # test_inputs = test_inputs.reshape(10000, 784).to(device)
 # test_targets = test_targets.reshape(10000,-1).to(device)
 #
 # n_train =60000
-# train_inputs = train_inputs[0:n_train,:]
-# train_targets = train_targets[0:n_train].float()
+# x_train = x_train[0:n_train,:]
+# y_train = y_train[0:n_train].float()
 #
 # n_test =10000
 # x_test = test_inputs[0:n_test,:]
@@ -106,17 +103,17 @@ D_in, H1, D_out = 3072, 20, 1
 
 test_con = True
 
-# train_inputs, train_targets = iter(train_loader).next()
-# train_inputs = train_inputs.reshape(100,3072).to(device)
-# train_targets = train_targets.reshape(100,-1).to(device)
+# x_train, y_train = iter(train_loader).next()
+# x_train = x_train.reshape(100,3072).to(device)
+# y_train = y_train.reshape(100,-1).to(device)
 # #
 # test_inputs, test_targets = iter(test_loader).next()
 # test_inputs = test_inputs.reshape(100,3072).to(device)
 # test_targets = test_targets.reshape(100,-1).to(device)
 #
 # n_train =50000
-# train_inputs = train_inputs[0:n_train,:]
-# train_targets = train_targets[0:n_train].float()
+# x_train = x_train[0:n_train,:]
+# y_train = y_train[0:n_train].float()
 # #
 # n_test =10000
 # x_test = test_inputs[0:n_test,:]
@@ -151,135 +148,146 @@ model_o = ResNet(ResidualBlock, [2, 2, 2]).to(
 # loss_fn = torch.nn.MSELoss(reduction='sum')  # selecting loss function
 loss_fn = torch.nn.CrossEntropyLoss()  # selecting loss function
 
-for opt_i in range(opt_n):
-    # Use the nn package to define a model for each optimizer
-    model[opt_i] = copy.deepcopy(model_o)
+# for opt_i in range(opt_n):
+#     # Use the nn package to define a model for each optimizer
+#     model[opt_i] = copy.deepcopy(model_o)
 
 
 # optimizers ##################3
 ########################################
 
-lr = [0 for i in range(opt_n)]
-name = [0 for i in range(opt_n)]
-optimizer = [0 for i in range(opt_n)]
+
+exec(open("./neural_netwrok_optimizers.py").read())
 
 
-# loss_train = [ 0 for i in range(opt_n)]
-# y_pred_train = [ 0 for i in range(opt_n)]
-
-# loss_test = [ 0 for i in range(opt_n)]
-# y_pred_test = [ 0 for i in range(opt_n)]
-
-closure_list = [0 for i in range(opt_n)]
-
-
-###########  ABGDc #############
-lr[0] = 1e-3
-name[0] = "ABGDc lr=" + str(lr[0])
-drift = True
-optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0],
-                      min_step_r=2**5, max_step_r=2**5)
-
-# defining the function to reevalute function and gradient if needed
-closure_list[0] = None
-
-
-###########  ABGDv #############
-lr[1] = 1e-4
-name[1] = "ABGDv lr=" + str(lr[1])
-drift = True
-optimizer[1] = abgd_v(model[1].parameters(), lr=lr[1])
-
-# defining the function to reevalute function and gradient if needed
-closure_list[1] = None
-
-
-###########  ABGDcs #############
-lr[2] = 1e-4
-name[2] = "ABGDcs lr=" + str(lr[2])
-drift = True
-optimizer[2] = abgd_cs(model[2].parameters(), lr=lr[2])
-
-# defining the function to reevalute function and gradient if needed
-
-
-def closure():
-    optimizer[2].np_to_params()
-    optimizer[2].zero_grad()
-    y_pred = model[2](train_inputs)
-    loss = loss_fn(y_pred, train_targets)
-    loss.backward()
-    optimizer[2].params_to_np()
-    return loss
-
-
-closure = torch.enable_grad()(closure)
-closure_list[2] = closure
-
-
-###########  ABGDvmd #############
-lr[3] = 1e-4
-name[3] = "ABGDvmd lr=" + str(lr[3])
-momentum = 0.7
-drift = True
-optimizer[3] = abgd_vmd(model[3].parameters(), lr=lr[3],
-                        momentum=momentum, drift=drift)
-
-# defining the function to reevalute function and gradient if needed
-
-
-def closure():
-    optimizer[3].np_to_params()
-    optimizer[3].zero_grad()
-    y_pred = model[3](train_inputs)
-    loss = loss_fn(y_pred, train_targets)
-    loss.backward()
-    optimizer[3].params_to_np()
-    return loss
-
-
-closure = torch.enable_grad()(closure)
-closure_list[3] = closure
-
-
-# ###### ADAM ##################
-lr[4] = 1e-3
-name[4] = "ADAM lr=" + str(lr[4])
-optimizer[4] = torch.optim.Adam(model[4].parameters(), lr=lr[4])
-closure_list[4] = None
-
-
-# ###### GD ##################
-lr[5] = 1e-2
-name[5] = "GD lr=" + str(lr[5])
-momentum = 0.9
-optimizer[5] = torch.optim.SGD(
-    model[5].parameters(), lr=lr[5], momentum=momentum)
-
-closure_list[5] = None
-
-
-###########  ABGDcsd #############
-lr[6] = 1e-4
-name[6] = "ABGDcsd lr=" + str(lr[6])
-drift = True
-optimizer[6] = abgd_csd(model[6].parameters(), lr=lr[6])
-
-# defining the function to reevalute function and gradient if needed
-
-
-def closure():
-    optimizer[6].np_to_params()
-    optimizer[6].zero_grad()
-    y_pred = model[6](train_inputs)
-    loss = loss_fn(y_pred, train_targets)
-    loss.backward()
-    optimizer[6].params_to_np()
-    return loss
-
-
-closure = torch.enable_grad()(closure)
-closure_list[6] = closure
+# lr = [0 for i in range(opt_n)]
+# name = [0 for i in range(opt_n)]
+# optimizer = [0 for i in range(opt_n)]
+#
+#
+# # loss_train = [ 0 for i in range(opt_n)]
+# # y_pred_train = [ 0 for i in range(opt_n)]
+#
+# # loss_test = [ 0 for i in range(opt_n)]
+# # y_pred_test = [ 0 for i in range(opt_n)]
+#
+# closure_list = [0 for i in range(opt_n)]
+#
+#
+# ###########  ABGDc #############
+# lr[0] = 1e-3
+# name[0] = "ABGDc lr=" + str(lr[0])
+# drift = True
+# optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0],
+#                       min_step_r=2**5, max_step_r=2**5)
+#
+# # defining the function to reevalute function and gradient if needed
+# closure_list[0] = None
+#
+#
+# ###########  ABGDv #############
+# lr[1] = 1e-2
+# name[1] = "ABGDv lr=" + str(lr[1])
+# drift = True
+# optimizer[1] = abgd_v(model[1].parameters(), lr=lr[1])
+#
+# # defining the function to reevalute function and gradient if needed
+# closure_list[1] = None
+#
+#
+# ###########  ABGDcs #############
+# lr[2] = 1e-4
+# name[2] = "ABGDcs lr=" + str(lr[2])
+# drift = True
+# optimizer[2] = abgd_cs(model[2].parameters(), lr=lr[2])
+#
+# # defining the function to reevalute function and gradient if needed
+#
+#
+# def closure():
+#     optimizer[2].np_to_params()
+#     optimizer[2].zero_grad()
+#     y_pred = model[2](x_train)
+#     loss = loss_fn(y_pred, y_train)
+#     loss.backward()
+#     optimizer[2].params_to_np()
+#     return loss
+#
+#
+# closure = torch.enable_grad()(closure)
+# closure_list[2] = closure
+#
+#
+# ###########  ABGDvmd #############
+# lr[3] = 1e-4
+# name[3] = "ABGDvmd lr=" + str(lr[3])
+# momentum = 0.7
+# drift = True
+# optimizer[3] = abgd_vmd(model[3].parameters(), lr=lr[3],
+#                         momentum=momentum, drift=drift)
+#
+# # defining the function to reevalute function and gradient if needed
+#
+#
+# def closure():
+#     optimizer[3].np_to_params()
+#     optimizer[3].zero_grad()
+#     y_pred = model[3](x_train)
+#     loss = loss_fn(y_pred, y_train)
+#     loss.backward()
+#     optimizer[3].params_to_np()
+#     return loss
+#
+#
+# closure = torch.enable_grad()(closure)
+# closure_list[3] = closure
+#
+#
+# # ###### ADAM ##################
+# lr[4] = 1e-3
+# name[4] = "ADAM lr=" + str(lr[4])
+# optimizer[4] = torch.optim.Adam(model[4].parameters(), lr=lr[4])
+# closure_list[4] = None
+#
+#
+# # ###### GD ##################
+# lr[5] = 1e-2
+# name[5] = "GD lr=" + str(lr[5])
+# momentum = 0.9
+# optimizer[5] = torch.optim.SGD(
+#     model[5].parameters(), lr=lr[5], momentum=momentum)
+#
+# closure_list[5] = None
+#
+#
+# ###########  ABGDcsd #############
+# lr[6] = 1e-4
+# name[6] = "ABGDcsd lr=" + str(lr[6])
+# drift = True
+# optimizer[6] = abgd_csd(model[6].parameters(), lr=lr[6])
+#
+# # defining the function to reevalute function and gradient if needed
+#
+#
+# def closure():
+#     optimizer[6].np_to_params()
+#     optimizer[6].zero_grad()
+#     y_pred = model[6](x_train)
+#     loss = loss_fn(y_pred, y_train)
+#     loss.backward()
+#     optimizer[6].params_to_np()
+#     return loss
+#
+#
+# closure = torch.enable_grad()(closure)
+# closure_list[6] = closure
+#
+#
+# ###########  ADAM2 #############
+# lr[7] = 1e-2
+# name[7] = "ADAM2 lr=" + str(lr[7])
+# optimizer[7] = adam2(model[7].parameters(), lr=lr[7])
+# closure_list[7] = None
 
 
 ######  creating files to output data ########
@@ -327,15 +335,16 @@ file = [0 for i in range(opt_n)]
 for epoch_i in range(epochs):
     for mbacth_i, (x, y) in enumerate(train_loader):
 
-        train_inputs, train_targets = iter(train_loader).next()
-        # train_inputs = train_inputs.reshape(100, 3072).to(device)
-        # train_targets = train_targets.reshape(100, -1).to(device)
-        train_inputs = train_inputs.to(device)
-        train_targets = train_targets.to(device)
+        x_train, y_train = iter(train_loader).next()
+        # x_train = x_train.reshape(100, 3072).to(device)
+        # y_train = y_train.reshape(100, -1).to(device)
+        x_train = x_train.to(device)
+        y_train = y_train.to(device)
+
 
         # n_train = 5000
-        # train_inputs = train_inputs[0:n_train, :]
-        # train_targets = train_targets[0:n_train]  # .float()
+        # x_train = x_train[0:n_train, :]
+        # y_train = y_train[0:n_train]  # .float()
 
         test_inputs, test_targets = iter(test_loader).next()
         # test_inputs = test_inputs.reshape(100, 3072).to(device)
@@ -350,10 +359,10 @@ for epoch_i in range(epochs):
         for opt_i in opt_list:
 
             # Forward pass: compute predicted y by passing x to the model.
-            y_pred_train = model[opt_i](train_inputs)
+            y_pred_train = model[opt_i](x_train)
 
             # Compute loss.
-            loss_train = loss_fn(y_pred_train, train_targets)
+            loss_train = loss_fn(y_pred_train, y_train)
 
             if test_con:
                 y_pred_test = model[opt_i](test_inputs)

@@ -11,7 +11,7 @@ ax1 = fig1.add_subplot(111)
 prop_cycle = (cycler('color', ['y', 'k', 'dimgrey', 'c', 'r', 'b', 'm', 'pink']))
 ax1.set_prop_cycle(prop_cycle)
 
-path = "outputs/neural_network/train"
+path = "outputs/main"
 files = os.listdir(path)
 for f in files:
     file_path = path+"/"+f
@@ -19,9 +19,9 @@ for f in files:
     if len(data) != 0:
         ax1.plot(data[:, 0], data[:, 1], '.-', label=f)
 
-plt.title("Neural Network Convergence - train")
-plt.xlabel("epochs")
-plt.ylabel("loss")
+plt.title("Convergence")
+plt.xlabel("steps")
+plt.ylabel("function value")
 legend = plt.legend()
 # ax1.set_xlim(-1, 40)
 # ax1.set_ylim(0, 2000000)

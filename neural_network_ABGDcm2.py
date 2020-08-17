@@ -4,17 +4,17 @@ import copy
 from torch.autograd import Variable
 import copy
 
-import optimiser_ABGDv
+import optimiser_ABGDcm2
 
 
 
-class abgd_v(torch.optim.Optimizer):
+class abgd_cm2(torch.optim.Optimizer):
     def __init__(self, params, lr=0.01):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
         defaults = dict(lr=lr)
-        super(abgd_v, self).__init__(params, defaults)
+        super(abgd_cm2, self).__init__(params, defaults)
         self._params = self.param_groups[0]['params']
 
         self.lr = lr
@@ -26,45 +26,18 @@ class abgd_v(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDv_init.py").read())
+        exec(open("./optimiser_ABGDcm2_init.py").read())
 
-    _update_params = optimiser_ABGDv.abgd_v._update_params
-
-
+    _update_params = optimiser_ABGDcm2.abgd_cm2._update_params
 
     @torch.no_grad()
     def step(self, closure=None):
 
         self.params_to_np()
-        if self.t == 1:
-            self._find_lr(closure)
-            self.t = 1
         self._update_params(closure)
         self.np_to_params()
 
         return
-
-
-
-
-    def _find_lr(self, closure):
-        self.step_g = self.lr / 1000
-        xx = self.x[:]
-        loss0 = closure()
-        loss2 = loss0
-        loss1 = loss0
-
-        while not loss2 > loss1:
-            loss1 = loss2
-            self.step_g = 10 * self.step_g
-            self._update_params(closure)
-            loss2 = closure()
-            self.x = xx
-
-        loss0 = closure()
-        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 10))
-        self.lr = self.step_g
-
 
     
 
