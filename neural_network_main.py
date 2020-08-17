@@ -41,8 +41,8 @@ epochs = 50000
 
 ###### random data #########
 
-N = 8000
-D_in, H1, D_out = 3,200, 1
+N = 10000
+D_in, H1, D_out = 3,300, 1
 
 # Create random Tensors to hold inputs and outputs
 torch.manual_seed(43)

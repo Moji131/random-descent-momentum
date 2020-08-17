@@ -26,7 +26,7 @@ class adam(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_adam_init.py").read())
+        exec(open("./optimiser_ADAM_init.py").read())
 
     _update_params = optimiser_ADAM.adam._update_params
 
@@ -63,7 +63,7 @@ class adam(torch.optim.Optimizer):
             self.x = xx
 
         loss0 = closure()
-        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 10))
+        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
         self.lr = self.step_g
 
 
