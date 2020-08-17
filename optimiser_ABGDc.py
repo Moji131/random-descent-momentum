@@ -39,8 +39,34 @@ class abgd_c():
 
 
 
-    def step(self, closure = None):
-        self._update_params()
+
+    def step(self, closure):
+        if self.t == 1:
+            self._find_lr(closure)
+            self.t = 1
+        self._update_params(closure)
+
+
+
+
+    def _find_lr(self, closure):
+        self.step_g = self.lr / 1000
+        xx = self.x[:]
+        loss0 = closure()
+        loss2 = loss0
+        loss1 = loss0
+
+        while not loss2 > loss1:
+            loss1 = loss2
+            self.step_g = 10 * self.step_g
+            self._update_params(closure)
+            loss2 = closure()
+            self.x = xx
+
+
+        loss0 = closure()
+        self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 10 ))
+        self.lr = self.step_g
 
 
 

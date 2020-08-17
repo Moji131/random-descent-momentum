@@ -19,9 +19,16 @@ self.m_m1_sign = np.ones(self.d)
 self.state_m1 = np.zeros(self.d)
 
 
+self.vcoef = 0.99
+self.v = 0
+
 self.stop_count = np.zeros(self.d)
 self.m_max = 3
 self.converge = np.zeros(self.d)
 self.converge_count = np.zeros(self.d)
 self.g_m1_sign = np.ones(self.d)
 self.g_0_sign = np.ones(self.d)
+
+
+
+self.g_m1 = np.zeros(self.d)

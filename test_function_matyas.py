@@ -3,7 +3,7 @@ import numpy as np
 
 pi = 3.14159265359
 theta = pi/4.0 # 0.1 * pi / 6.00 # to rotate the function around teh z axis
-a = 0.0000001
+a = 0.1
 
 def matyas_main(x):
 
