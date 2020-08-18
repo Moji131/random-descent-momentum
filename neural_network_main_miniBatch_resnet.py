@@ -20,7 +20,7 @@ from resnet import *
 opt_n = 9
 #    [0    , 1    , 2    , 3   , 4      , 5      , 6     , 7           , 8          ]
 #    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy]
-lr = [0.1  , 0.1  , 1e-2 , 1e-5, 0.1    , 1e-1   , 1e-2  , 1e-2         , 1e-4        ]
+lr = [1e-4  , 1e-4  , 1e-4 , 1e-5, 1e-4    , 1e-4   , 1e-4  , 1e-4         , 1e-4        ]
 opt_list = [2,6,7]  # list of active optimizers
 # opt_list = [0,2,4,6]
 # opt_list = [4]
@@ -368,44 +368,6 @@ for epoch_i in range(epochs):
                 y_pred_test = model[opt_i](test_inputs)
                 loss_test = loss_fn(y_pred_test, test_targets)
 
-            # saving loss each epoch
-            if epoch_i % save_count == 0 and mbacth_i == 0:
-                # saving train loss to file
-                file[opt_i] = open(
-                    'outputs/neural_network/train/' + name[opt_i], 'a')
-                str_to_file = str(epoch_i) + "\t" + \
-                    str(loss_train.data.item()) + "\n"
-                file[opt_i].write(str_to_file)
-                file[opt_i].close()
-
-                # saving test loss to file
-                if test_con:
-                    file[opt_i] = open(
-                        'outputs/neural_network/test/' + name[opt_i], 'a')
-                    str_to_file = str(epoch_i) + "\t" + \
-                        str(loss_test.data.item()) + "\n"
-                    file[opt_i].write(str_to_file)
-                    file[opt_i].close()
-
-            # saving loss each minibatch
-            # saving train loss to file
-            file[opt_i] = open(
-                'outputs/neural_network_minibatch/train/' + name[opt_i], 'a')
-            t_batch = mbacth_i + epoch_i * train_szie/batch_size
-            str_to_file = str(t_batch) + "\t" + \
-                str(loss_train.data.item()) + "\n"
-            file[opt_i].write(str_to_file)
-            file[opt_i].close()
-
-            # saving test loss to file
-            if test_con:
-                file[opt_i] = open(
-                    'outputs/neural_network_minibatch/test/' + name[opt_i], 'a')
-                str_to_file = str(t_batch) + "\t" + \
-                    str(loss_test.data.item()) + "\n"
-                file[opt_i].write(str_to_file)
-                file[opt_i].close()
-
             # Before the backward pass, use the optimizer object to zero all of the
             optimizer[opt_i].zero_grad()
 
@@ -414,6 +376,46 @@ for epoch_i in range(epochs):
 
             # Calling the step function on an Optimizer makes an update to its parameters
             optimizer[opt_i].step(closure=closure_list[opt_i])
+
+
+            # saving loss each epoch
+            if epoch_i % save_count == 0 and mbacth_i == 0:
+                # saving train loss to file
+                str1 = 'outputs/neural_network/train/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)
+                file[opt_i] = open(str1, 'a')
+                str_to_file = str(epoch_i) + "\t" + \
+                    str(loss_train.data.item()) + "\n"
+                file[opt_i].write(str_to_file)
+                file[opt_i].close()
+
+                # saving test loss to file
+                if test_con:
+                    str1 = 'outputs/neural_network/test/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)
+                    file[opt_i] = open(str1, 'a')
+                    str_to_file = str(epoch_i) + "\t" + \
+                        str(loss_test.data.item()) + "\n"
+                    file[opt_i].write(str_to_file)
+                    file[opt_i].close()
+
+            # saving loss each minibatch
+            # saving train loss to file
+            str1 = 'outputs/neural_network_minibatch/train/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)
+            file[opt_i] = open(str1, 'a')
+            t_batch = mbacth_i + epoch_i * train_szie/batch_size
+            str_to_file = str(t_batch) + "\t" + \
+                str(loss_train.data.item()) + "\n"
+            file[opt_i].write(str_to_file)
+            file[opt_i].close()
+
+            # saving test loss to file
+            if test_con:
+                str1 = 'outputs/neural_network_minibatch/test/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)
+                file[opt_i] = open(str1, 'a')
+                str_to_file = str(t_batch) + "\t" + \
+                    str(loss_test.data.item()) + "\n"
+                file[opt_i].write(str_to_file)
+                file[opt_i].close()
+
 
 
 

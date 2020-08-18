@@ -213,7 +213,8 @@ for t in range(1,epochs+1):
             file[opt_i].close()
 
             if test_con:
-                file[opt_i] = open('outputs/neural_network/test/' + name[opt_i], 'a')
+                str1 = 'outputs/neural_network/test/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)
+                file[opt_i] = open(str1, 'a')
                 str_to_file = str(t) + "\t" + str(loss_test.data.item()) + "\n"
                 file[opt_i].write(str_to_file)
                 file[opt_i].close()
