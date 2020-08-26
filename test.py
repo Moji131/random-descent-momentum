@@ -1,12 +1,24 @@
-d = 784
-total_C = 10
-n = 784
-import numpy.random as rand
-import numpy as np
+from mpi4py import MPI
 
-rand.seed(5)
-w = rand.randn(d*(total_C-1), 1)
-print(w.shape)
-w = np.ones(w.shape)
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
 
-print(w)
+
+if rank != 0:
+    data = rank
+    comm.send(data, dest=0)
+else:
+    print("This is rank 0")
+    f = open("out.txt", "w")
+    f.write("This is rank 0")
+    f.close()
+
+    f = open("out.txt", "a")
+    for i in range(1,size):
+        data = comm.recv(source=i)
+        str1 = "\nThis is a message from " + str(data)
+        print(str1 )
+        f.write(str1 )
+    f.close()
+

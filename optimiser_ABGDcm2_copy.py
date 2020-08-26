@@ -163,7 +163,7 @@ class abgd_cm2_copy():
 
 
         loss0 = closure()
-        self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 10  ))
+        self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 20  ))
 
 
 
