@@ -29,7 +29,8 @@ class abgd_vm_copy(torch.optim.Optimizer):
         exec(open("./optimiser_ABGDvm_copy_init.py").read())
 
     _update_params = optimiser_ABGDvm_copy.abgd_vm_copy._update_params
-
+    _find_step_g = optimiser_ABGDvm_copy.abgd_vm_copy._find_step_g
+    _find_step_m = optimiser_ABGDvm_copy.abgd_vm_copy._find_step_m
 
 
 
@@ -37,9 +38,6 @@ class abgd_vm_copy(torch.optim.Optimizer):
     def step(self, closure=None):
 
         self.params_to_np()
-        if self.t == 1:
-            self._find_lr(closure)
-            self.t = 1
         self._update_params(closure)
         self.np_to_params()
 

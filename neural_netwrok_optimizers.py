@@ -27,7 +27,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[0].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[0] = closure
 
@@ -46,7 +46,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[1].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[1] = closure
 
@@ -64,7 +64,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[2].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[2] = closure
 
@@ -82,7 +82,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[3].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[3] = closure
 
@@ -102,7 +102,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[4].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[4] = closure
 
@@ -120,7 +120,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[5].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[5] = closure
 
@@ -138,7 +138,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[6].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[6] = closure
 
@@ -156,7 +156,7 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[7].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[7] = closure
 
@@ -174,6 +174,6 @@ def closure():
     loss = loss_fn(y_pred, y_train)
     loss.backward()
     optimizer[8].params_to_np()
-    return loss
+    return loss.item()
 closure = torch.enable_grad()(closure)
 closure_list[8] = closure

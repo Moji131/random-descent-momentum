@@ -4,7 +4,7 @@
 
 
 ### defining lists to hold parameters for diffrent optmizers
-opt_n = 9 # number of optimizers defined
+opt_n = 10 # number of optimizers defined
 name = [ 0 for i in range(opt_n)]
 optimizer = [ 0 for i in range(opt_n)]
 label = [ 0 for i in range(opt_n)]
@@ -155,7 +155,6 @@ closure_list[7] = closure
 
 
 ####### ABGDvm ##################
-n = 8
 name[8] = "ABGDvm_copy"
 from optimiser_ABGDvm_copy import abgd_vm_copy
 optimizer[8] = abgd_vm_copy(x_start, lr=lr[8])
@@ -169,3 +168,19 @@ def closure():
     loss = func_main(optimizer[8].x)
     return loss
 closure_list[8] = closure
+
+
+####### RDM ##################
+name[9] = "RDM"
+from optimiser_RDM import rdm
+optimizer[9] = rdm(x_start, lr=lr[9])
+optimizer[9].x = x_start
+label[9] = name[9] + " lr=" + str(lr[9])
+x_out[9] = [x_start]
+t_out[9] = [0]
+# defining the function to reevalute function and gradient if needed
+def closure():
+    optimizer[9].g = func_grad(optimizer[9].x)
+    loss = func_main(optimizer[9].x)
+    return loss
+closure_list[9] = closure

@@ -3,8 +3,8 @@
 
 import numpy as np
 
-class gdm():
-    def __init__(self, params, lr=0.01, momentum = 0.9):
+class rdm():
+    def __init__(self, params, lr=0.01, momentum = 0.95):
 
         self.lr = lr
 
@@ -14,18 +14,43 @@ class gdm():
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_GDM_init.py").read())
+        exec(open("./optimiser_RDM_init.py").read())
 
 
 
     def _update_params(self, closure):
-        self.v = self.m * self.v +  self.g
-        self.x = self.x - self.v * self.lr
+
+        if self.t == 1:
+            l = closure()
+            p = np.random.random(self.d)
+            p_normed = p / np.linalg.norm(p)
+        else:
+            l = closure()
+            g = (l-self.l_m1) * (self.x - self.x_m1) / self.step_g /self.step_g
+            self.m = self.momentum * self.m +  g
+            m_normed = self.m / np.linalg.norm(self.m)
+
+            s = np.random.random(self.d)
+            s_normed = s / np.linalg.norm(s)
+            s_m_dot = np.dot(s_normed, m_normed)
+            s_perp = s_normed - m_normed * s_m_dot
+
+            p =  m_normed + s_perp
+            p_normed = p / np.linalg.norm(p)
+
+        self.x_m1 = self.x
+        self.x = self.x - p_normed * self.step_g
+
+        self.l_m1 = l
+
+
+
 
     def step(self, closure):
         # if self.t == 1:
         #     self._find_lr(closure)
         #     self.t = 1
+        self.step_g = self.lr
         self._update_params(closure)
 
     def _find_lr(self, closure):
