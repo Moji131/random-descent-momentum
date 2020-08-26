@@ -77,24 +77,24 @@ class abgd_cm2_copy():
         scale_main = 50000
 
 
-        ff = open('outputs/main/0-ind_d-cm2', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_main) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/main/0-beta_i-cm2', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_main / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-
-        scale_nn = 140
-        ff = open('outputs/neural_network/train/0-ind_d-cm2', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_nn) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/neural_network/train/0-beta_i-cm2', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_nn / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
+        # ff = open('outputs/main/0-ind_d-cm2', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_main) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/main/0-beta_i-cm2', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_main / (self.beta_size)) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        #
+        # scale_nn = 140
+        # ff = open('outputs/neural_network/train/0-ind_d-cm2', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_nn) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/neural_network/train/0-beta_i-cm2', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_nn / (self.beta_size)) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
 
 
 

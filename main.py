@@ -27,12 +27,12 @@ import os
 # from optimiser_ADAM2 import adam2
 
 ### parameters
-#    [0    , 1    , 2   , 3  , 4      , 5      , 6     , 7           , 8          ]
-#    [ABGDc, ABGDv, ADAM, GDM, ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy]
-lr = [0.1  , 0.1  , 1e-3, 0.1, 0.1    , 1e+1   , 1e+1  , 1e+1        , 1e+1       ]
-opt_list = [2,6,7] # list of optimizers to be applied
+#    [0    , 1    , 2   , 3  , 4      , 5      , 6     , 7           , 8          , 9]
+#    [ABGDc, ABGDv, ADAM, GDM, ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy, RDM]
+lr = [0.1  , 0.1  , 1e-3, 0.5, 0.1    , 1e+1   , 1e+1  , 1e+1        , 232     , 1e+1]
+opt_list = [2,5,7,8] # list of optimizers to be applied
 
-max_iterations = 100 # maximum number of iterations
+max_iterations = 150 # maximum number of iterations
 
 
 

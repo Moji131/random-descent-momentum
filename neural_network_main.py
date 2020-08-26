@@ -26,11 +26,11 @@ lr = [0.1  , 0.1  , 1e-2 , 1e-5, 0.1    , 1e-1   , 1e-2  , 1e-2         , 1e-4  
 
 # lr = [0.1  , 0.1  , 1e-2 , 1e-5, 0.1    , 1e-1   , 1e-1  , 1e-2         , 1e-4        ]
 # opt_list = [2,6,7] # list of optimizers to be applied
-opt_list = [2,6,7] # list of optimizers to be applied
+opt_list = [2,6,7, 8] # list of optimizers to be applied
 
 save_count = 1
 print_count = 1
-epochs = 50000
+epochs = 10000
 
 
 
@@ -41,11 +41,11 @@ epochs = 50000
 
 ###### random data #########
 
-N = 8000
-D_in, H1, D_out = 3,200, 1
+N = 100
+D_in, H1, D_out = 1,7, 1
 
 # Create random Tensors to hold inputs and outputs
-torch.manual_seed(43)
+torch.manual_seed(35)
 x_train = torch.randn(N, D_in)
 y_train = torch.randn(N, D_out)
 

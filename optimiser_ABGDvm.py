@@ -30,7 +30,7 @@ class abgd_vm():
             # self.mx10[:] = self.x[:]
             self.x_m1 = self.x + g_0_normed * self.step_g
             for i in range(self.beta_size):
-                self.m_list[i] = gg[:]
+                # self.m_list[i] = gg[:]
                 self.md_list[i] = - g_0_normed * self.step_g
                 self.vd_list[i] = np.linalg.norm(g_0_normed * self.step_g)
 
@@ -44,7 +44,7 @@ class abgd_vm():
 
         d = self.x - self.x_m1
         for i in range(self.beta_size):
-            alpha_d = min((1 - self.beta_list[i]), 0.5)
+            alpha_d = min((1 - self.beta_list[i]), 0.5) # to work for momentum 0
             self.md_list[i] = (1-alpha_d) * self.md_list[i]  + alpha_d * d
             self.vd_list[i] = (1-alpha_d) * self.vd_list[i]  + alpha_d * np.linalg.norm(d)
             self.ind_d_list[i] = np.linalg.norm(self.md_list[i]) / self.vd_list[i]
@@ -65,25 +65,25 @@ class abgd_vm():
         #     self.step_g = self.step_g * 1.1
 
 
-        scale_main = 50000
-        ff = open('outputs/main/0-ind_d-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_main) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/main/0-beta_i-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_main / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-
-        scale_nn = 140
-        ff = open('outputs/neural_network/train/0-ind_d-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_nn) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/neural_network/train/0-beta_i-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_nn / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
+        # scale_main = 50000
+        # ff = open('outputs/main/0-ind_d-vm', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_main) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/main/0-beta_i-vm', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_main / (self.beta_size)) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        #
+        # scale_nn = 140
+        # ff = open('outputs/neural_network/train/0-ind_d-vm', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.ind_d_list[self.beta_i,0]* scale_nn) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/neural_network/train/0-beta_i-vm', 'a')
+        # str_to_file = str(self.t) + "\t" + str( self.beta_i * scale_nn / (self.beta_size)) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
 
 
 
@@ -107,11 +107,11 @@ class abgd_vm():
                 self.step_g = 2.0 * self.step_g
 
 
-        # if self.beta_i == self.beta_size - 1 and self.beta_list[self.beta_i] != 0:
-        #     if g_m_dot > 0:
-        #         self.step_g = self.step_g * 1.01
-        #     else:
-        #         self.step_g = self.step_g / 1.0
+        if self.beta_i == self.beta_size - 1 and self.beta_list[self.beta_i] != 0:
+            if g_m_dot > 0:
+                self.step_g = self.step_g * 1.01
+            else:
+                self.step_g = self.step_g / 1.0
 
 
         self.x_m1[:] = self.x[:]
@@ -135,9 +135,9 @@ class abgd_vm():
 
 
     def step(self, closure):
-        # if self.t == 1:
-        #     self._find_lr(closure)
-        #     self.t = 1
+        if self.t == 1:
+            self._find_lr(closure)
+            self.t = 1
         self._update_params(closure)
 
 
@@ -159,7 +159,7 @@ class abgd_vm():
 
 
         loss0 = closure()
-        self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 20 ))
+        self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 2 ))
         # self.step_g = ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 10
         self.lr = self.step_g
 
