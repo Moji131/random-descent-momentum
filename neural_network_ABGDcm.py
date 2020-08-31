@@ -9,7 +9,7 @@ import optimiser_ABGDcm
 
 
 class abgd_cm(torch.optim.Optimizer):
-    def __init__(self, params, lr=0.01, min_step_r=2 ** 20, max_step_r=2 ** 20, momentum = 0.9):
+    def __init__(self, params, lr=0.01, beta_list = [0,0.9, 0.93], beta2_list = [0.999,0.999,0.999], find_lr = True, reset_min = True, cal_step_g = True):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
@@ -28,20 +28,21 @@ class abgd_cm(torch.optim.Optimizer):
         ##### initialising parameters specific to the algorithm #######
         exec(open("./optimiser_ABGDcm_init.py").read())
 
-
-
-
     _update_params = optimiser_ABGDcm.abgd_cm._update_params
-
+    _find_step_g = optimiser_ABGDcm.abgd_cm._find_step_g
+    _find_step_m = optimiser_ABGDcm.abgd_cm._find_step_m
 
     @torch.no_grad()
     def step(self, closure=None):
 
         self.params_to_np()
-        self._update_params()
+        self._update_params(closure)
         self.np_to_params()
 
         return
+
+
+
 
 
 

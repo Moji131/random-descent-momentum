@@ -17,16 +17,18 @@ from resnet import *
 
 
 ############ settings #######################
-opt_n = 9
-#    [0    , 1    , 2    , 3   , 4      , 5      , 6     , 7           , 8          ]
-#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy]
-lr = [1e-4  , 1e-4  , 1e-4 , 1e-5, 1e-4    , 1e-4   , 1e-4  , 1e-4         , 1e-4        ]
-opt_list = [2,6,7]  # list of active optimizers
-# opt_list = [0,2,4,6]
-# opt_list = [4]
+opt_n = 7
+#    [0    , 1    , 2    , 3   , 4      , 5      , 6     ]
+#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm]
+lr = [0.1  , 0.1  , 1e-2 , 3e-4, 0.1    , 1e-1   , 1e-2  ]
+opt_list = [2, 3, 5, 6] # list of optimizers to be applied
+
+
 save_count = 1
 print_count = 1
-epochs = 300
+epochs = 200
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 ############ Data load #######################
@@ -54,8 +56,6 @@ epochs = 300
 # test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
 # train_loader = DataLoader(train_set, batch_size=len(train_set))
 # test_loader = DataLoader(test_set, batch_size=len(test_set))
-#
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #
 # x_train, y_train = iter(train_loader).next()
 # x_train = x_train.reshape(60000, 784).to(device)
@@ -89,16 +89,13 @@ transform = transforms.Compose([
     transforms.RandomCrop(32),
     transforms.ToTensor()])
 
-train_set = datasets.CIFAR10(
-    "data/CIFAR10/trainset", transform=transform, download=True, train=True)
-test_set = datasets.CIFAR10("data/CIFAR10/testset",
-                            train=False, transform=transform, download=True)
+train_set = datasets.CIFAR10("data/CIFAR10/trainset", transform=transform, download=True, train=True)
+test_set  = datasets.CIFAR10("data/CIFAR10/testset",  train=False, transform=transform, download=True)
 train_szie = 50000
 batch_size = 100
 train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 D_in, H1, D_out = 3072, 20, 1
 
 test_con = True

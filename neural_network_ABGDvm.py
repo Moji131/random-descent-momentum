@@ -9,7 +9,7 @@ import optimiser_ABGDvm
 
 
 class abgd_vm(torch.optim.Optimizer):
-    def __init__(self, params, lr=0.01):
+    def __init__(self, params, lr=0.01, beta_list = [0,0.9,0.99], find_lr = True, reset_min = True, cal_step_g = True):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
@@ -29,7 +29,8 @@ class abgd_vm(torch.optim.Optimizer):
         exec(open("./optimiser_ABGDvm_init.py").read())
 
     _update_params = optimiser_ABGDvm.abgd_vm._update_params
-
+    _find_step_g = optimiser_ABGDvm.abgd_vm._find_step_g
+    _find_step_m = optimiser_ABGDvm.abgd_vm._find_step_m
 
 
 
@@ -37,34 +38,12 @@ class abgd_vm(torch.optim.Optimizer):
     def step(self, closure=None):
 
         self.params_to_np()
-        if self.t == 1:
-            self._find_lr(closure)
-            self.t = 1
         self._update_params(closure)
         self.np_to_params()
 
         return
 
 
-
-
-    def _find_lr(self, closure):
-        self.step_g = self.lr / 1000
-        xx = self.x[:]
-        loss0 = closure()
-        loss2 = loss0
-        loss1 = loss0
-
-        while not loss2 > loss1:
-            loss1 = loss2
-            self.step_g = 10 * self.step_g
-            self._update_params(closure)
-            loss2 = closure()
-            self.x = xx
-
-        loss0 = closure()
-        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
-        self.lr = self.step_g
 
 
 

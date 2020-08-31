@@ -6,7 +6,7 @@ self.step_g = self.lr
 
 
 
-self.beta_list = np.array([0,0.88,0.92])
+self.beta_list = np.array([0,0.9,0.95])
 self.beta2_list = np.array([0.999,0.999, 0.999])
 
 # self.beta_list = np.array([0,0.75,0.9])

@@ -19,18 +19,16 @@ import numpy as np
 # # opt_list = [0,2,4,6]
 
 ### parameters
-opt_n = 9
-#    [0    , 1    , 2    , 3   , 4      , 5      , 6     , 7           , 8          ]
-#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy]
-lr = [0.1  , 0.1  , 1e-2 , 1e-5, 0.1    , 1e-1   , 1e-2  , 1e-2         , 1e-4        ]
+opt_n = 7
+#    [0    , 1    , 2    , 3   , 4      , 5      , 6     ]
+#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm]
+lr = [0.1  , 0.1  , 1e-2 , 3e-4, 0.1    , 1e-1   , 1e-2  ]
 
-# lr = [0.1  , 0.1  , 1e-2 , 1e-5, 0.1    , 1e-1   , 1e-1  , 1e-2         , 1e-4        ]
-# opt_list = [2,6,7] # list of optimizers to be applied
-opt_list = [2,6,7, 8] # list of optimizers to be applied
+opt_list = [2, 3, 5, 6] # list of optimizers to be applied
 
 save_count = 1
 print_count = 1
-epochs = 10000
+epochs = 40000
 
 
 
@@ -41,11 +39,11 @@ epochs = 10000
 
 ###### random data #########
 
-N = 100
-D_in, H1, D_out = 1,7, 1
+N = 500
+D_in, H1, D_out = 1,40, 1
 
 # Create random Tensors to hold inputs and outputs
-torch.manual_seed(35)
+torch.manual_seed(51)
 x_train = torch.randn(N, D_in)
 y_train = torch.randn(N, D_out)
 
@@ -202,8 +200,9 @@ for t in range(1,epochs+1):
         # Backward pass: compute gradient of the loss with respect to model parameters
         loss_train.backward()
 
+        optimizer[opt_i].loss1 = loss_train.data.item()
         # Calling the step function on an Optimizer makes an update to its parameters
-        optimizer[opt_i].step(closure=closure_list[opt_i])
+        optimizer[opt_i].step(closure=closure_list[opt_i], )
 
         if t % save_count == 0:
             str1 = 'outputs/neural_network/train/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)

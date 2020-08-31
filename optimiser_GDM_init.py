@@ -1,4 +1,6 @@
 ##### initialising parameters specific to the algorithm #######
 
-self.m = momentum
-self.v = np.zeros(self.d)
+self.beta = momentum
+self.m = np.zeros(self.d)
+self.step_m = self.lr
+self.t = 1

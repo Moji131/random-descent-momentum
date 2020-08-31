@@ -1,19 +1,22 @@
 ##### initialising parameters specific to the algorithm #######
 
 self.step_g = self.lr
-self.step_g_save = self.lr
-self.step_d = self.lr
-
-self.beta_list = np.array([0, 0.85 ,0.9, 0.94])
+self.step_m = self.lr
+self.g_delay = 0
+self.reset_min = reset_min
+self.beta_list = np.array(beta_list)
 self.beta_size = np.size(self.beta_list)
-self.beta_i = self.beta_size - 1
+self.m_i = self.beta_size - 1
+self.find_lr = find_lr
+self.cal_step_g = cal_step_g
 
 sh = (self.beta_size, self.d)
 self.m_list = np.zeros(sh)
+self.m_list_m1 = np.zeros(sh)
 self.md_list = np.zeros(sh)
 sh = (self.beta_size, 1)
 self.vd_list = np.zeros(sh)
-self.ind_d_list = np.zeros(sh)
+self.ind_d_list = np.ones(sh)
 
 self.g0_gm1_dot_m1 = 1
 
@@ -66,4 +69,9 @@ self.g_sum_normed_m1 = np.zeros(self.d)
 self.x_m1 = np.zeros(self.d)
 self.md10 = np.zeros(self.d)
 self.vd10 = 0
+
+self.loss0 = 0
+self.loss1 = 0
+self.loss_min = 1e100
+self.x_min =  np.zeros(self.d)
 

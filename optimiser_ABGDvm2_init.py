@@ -1,16 +1,15 @@
 ##### initialising parameters specific to the algorithm #######
 
 self.step_g = self.lr
-self.step_m = self.lr
-self.g_delay = 0
+self.step_g_save = self.lr
+self.step_d = self.lr
 
-self.beta_list = np.array([0,0.8,0.9,0.97])
+self.beta_list = np.array([0, 0.9, 0.94])
 self.beta_size = np.size(self.beta_list)
-self.m_i = self.beta_size - 1
+self.beta_i = self.beta_size - 1
 
 sh = (self.beta_size, self.d)
 self.m_list = np.zeros(sh)
-self.m_list_m1 = np.zeros(sh)
 self.md_list = np.zeros(sh)
 sh = (self.beta_size, 1)
 self.vd_list = np.zeros(sh)

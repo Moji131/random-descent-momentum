@@ -8,7 +8,7 @@ import copy
 
 fig1 = plt.figure(1)
 ax1 = fig1.add_subplot(111)
-prop_cycle = (cycler('color', ['y', 'k', 'dimgrey', 'c', 'r', 'b', 'm', 'pink']))
+prop_cycle = (cycler('color', ['y', 'k', 'dimgrey', 'c', 'r', 'b', 'm', 'pink','g']))
 ax1.set_prop_cycle(prop_cycle)
 
 path = "outputs/neural_network/train"

@@ -4,7 +4,7 @@
 
 
 ### defining lists to hold parameters for diffrent optmizers
-opt_n = 10 # number of optimizers defined
+opt_n = 7 # number of optimizers defined
 name = [ 0 for i in range(opt_n)]
 optimizer = [ 0 for i in range(opt_n)]
 label = [ 0 for i in range(opt_n)]
@@ -12,8 +12,8 @@ x_out = [ 0 for i in range(opt_n)]
 t_out = [ 0 for i in range(opt_n)]
 closure_list = [ 0 for i in range(opt_n)]
 
-#    [0    , 1    , 2   , 3  , 4      , 5      , 6     , 7           , 8          ]
-#    [ABGDc, ABGDc, ADAM, GDM, ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy]
+#    [0    , 1    , 2   , 3  , 4      , 5      , 6     ]
+#    [ABGDc, ABGDv, ADAM, GDM, ABGDvmd, ABGDcm, ABGDvm]
 
 
 ################# creating optimiser objects #####################
@@ -103,11 +103,11 @@ def closure():
 closure_list[4] = closure
 
 
-####### ABGDcm2 ##################
+####### ABGDcm ##################
 n = 5
-name[5] = "ABGDcm2"
-from optimiser_ABGDcm2 import abgd_cm2
-optimizer[5] = abgd_cm2(x_start, lr=lr[5])
+name[5] = "ABGDcm"
+from optimiser_ABGDcm import abgd_cm
+optimizer[5] = abgd_cm(x_start, lr=lr[5])
 optimizer[5].x = x_start
 label[5] = name[5] + " lr=" + str(lr[5])
 x_out[5] = [x_start]
@@ -136,51 +136,51 @@ def closure():
     return loss
 closure_list[6] = closure
 
-
-####### ABGDcm2_copy ##################
-n = 7
-name[7] = "ABGDcm2_copy"
-from optimiser_ABGDcm2_copy import abgd_cm2_copy
-optimizer[7] = abgd_cm2_copy(x_start, lr=lr[7])
-optimizer[7].x = x_start
-label[7] = name[7] + " lr=" + str(lr[7])
-x_out[7] = [x_start]
-t_out[7] = [0]
-# defining the function to reevalute function and gradient if needed
-def closure():
-    optimizer[7].g = func_grad(optimizer[7].x)
-    loss = func_main(optimizer[7].x)
-    return loss
-closure_list[7] = closure
-
-
-####### ABGDvm ##################
-name[8] = "ABGDvm_copy"
-from optimiser_ABGDvm_copy import abgd_vm_copy
-optimizer[8] = abgd_vm_copy(x_start, lr=lr[8])
-optimizer[8].x = x_start
-label[8] = name[8] + " lr=" + str(lr[8])
-x_out[8] = [x_start]
-t_out[8] = [0]
-# defining the function to reevalute function and gradient if needed
-def closure():
-    optimizer[8].g = func_grad(optimizer[8].x)
-    loss = func_main(optimizer[8].x)
-    return loss
-closure_list[8] = closure
-
-
-####### RDM ##################
-name[9] = "RDM"
-from optimiser_RDM import rdm
-optimizer[9] = rdm(x_start, lr=lr[9])
-optimizer[9].x = x_start
-label[9] = name[9] + " lr=" + str(lr[9])
-x_out[9] = [x_start]
-t_out[9] = [0]
-# defining the function to reevalute function and gradient if needed
-def closure():
-    optimizer[9].g = func_grad(optimizer[9].x)
-    loss = func_main(optimizer[9].x)
-    return loss
-closure_list[9] = closure
+#
+# ####### ABGDcm2_copy ##################
+# n = 7
+# name[7] = "ABGDcm2"
+# from optimiser_ABGDcm2 import abgd_cm2_copy
+# optimizer[7] = abgd_cm2_copy(x_start, lr=lr[7])
+# optimizer[7].x = x_start
+# label[7] = name[7] + " lr=" + str(lr[7])
+# x_out[7] = [x_start]
+# t_out[7] = [0]
+# # defining the function to reevalute function and gradient if needed
+# def closure():
+#     optimizer[7].g = func_grad(optimizer[7].x)
+#     loss = func_main(optimizer[7].x)
+#     return loss
+# closure_list[7] = closure
+#
+#
+# ####### ABGDvm ##################
+# name[8] = "ABGDvm_copy"
+# from optimiser_ABGDvm2 import abgd_vm_copy
+# optimizer[8] = abgd_vm_copy(x_start, lr=lr[8])
+# optimizer[8].x = x_start
+# label[8] = name[8] + " lr=" + str(lr[8])
+# x_out[8] = [x_start]
+# t_out[8] = [0]
+# # defining the function to reevalute function and gradient if needed
+# def closure():
+#     optimizer[8].g = func_grad(optimizer[8].x)
+#     loss = func_main(optimizer[8].x)
+#     return loss
+# closure_list[8] = closure
+#
+#
+# ####### RDM ##################
+# name[9] = "RDM"
+# from optimiser_RDM import rdm
+# optimizer[9] = rdm(x_start, lr=lr[9])
+# optimizer[9].x = x_start
+# label[9] = name[9] + " lr=" + str(lr[9])
+# x_out[9] = [x_start]
+# t_out[9] = [0]
+# # defining the function to reevalute function and gradient if needed
+# def closure():
+#     optimizer[9].g = func_grad(optimizer[9].x)
+#     loss = func_main(optimizer[9].x)
+#     return loss
+# closure_list[9] = closure

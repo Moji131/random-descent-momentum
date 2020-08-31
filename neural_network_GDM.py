@@ -4,17 +4,17 @@ import copy
 from torch.autograd import Variable
 import copy
 
-import optimiser_ABGDcm2_copy
+import optimiser_GDM
 
 
 
-class abgd_cm2_copy(torch.optim.Optimizer):
-    def __init__(self, params, lr=0.01):
+class gdm(torch.optim.Optimizer):
+    def __init__(self, params, lr=0.01, momentum = 0.9):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
         defaults = dict(lr=lr)
-        super(abgd_cm2_copy, self).__init__(params, defaults)
+        super(gdm, self).__init__(params, defaults)
         self._params = self.param_groups[0]['params']
 
         self.lr = lr
@@ -26,17 +26,18 @@ class abgd_cm2_copy(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDcm2_copy_init.py").read())
+        exec(open("./optimiser_GDM_init.py").read())
 
-    _update_params = optimiser_ABGDcm2_copy.abgd_cm2_copy._update_params
+    _update_params = optimiser_GDM.gdm._update_params
+    _find_step_m = optimiser_GDM.gdm._find_step_m
+
+
+
 
     @torch.no_grad()
     def step(self, closure=None):
 
         self.params_to_np()
-        if self.t == 1:
-            self._find_lr(closure)
-            self.t = 1
         self._update_params(closure)
         self.np_to_params()
 
@@ -45,27 +46,6 @@ class abgd_cm2_copy(torch.optim.Optimizer):
 
 
 
-    def _find_lr(self, closure):
-        self.step_g = self.lr / 1000
-        xx = self.x[:]
-        loss0 = closure()
-        loss2 = loss0
-        loss1 = loss0
-
-        while not loss2 > loss1:
-            loss1 = loss2
-            self.step_g = 10 * self.step_g
-            self._update_params(closure)
-            loss2 = closure()
-            self.x = xx
-
-        loss0 = closure()
-        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
-        self.lr = self.step_g
-
-
-
-    
 
 
     def find_d(self):

@@ -4,17 +4,17 @@ import copy
 from torch.autograd import Variable
 import copy
 
-import optimiser_ABGDvm_copy
+import optimiser_ABGDvm
 
 
 
-class abgd_vm_copy(torch.optim.Optimizer):
+class abgd_vm(torch.optim.Optimizer):
     def __init__(self, params, lr=0.01):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
         defaults = dict(lr=lr)
-        super(abgd_vm_copy, self).__init__(params, defaults)
+        super(abgd_vm, self).__init__(params, defaults)
         self._params = self.param_groups[0]['params']
 
         self.lr = lr
@@ -26,11 +26,10 @@ class abgd_vm_copy(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDvm_copy_init.py").read())
+        exec(open("./optimiser_ABGDvm_init.py").read())
 
-    _update_params = optimiser_ABGDvm_copy.abgd_vm_copy._update_params
-    _find_step_g = optimiser_ABGDvm_copy.abgd_vm_copy._find_step_g
-    _find_step_m = optimiser_ABGDvm_copy.abgd_vm_copy._find_step_m
+    _update_params = optimiser_ABGDvm.abgd_vm._update_params
+
 
 
 
@@ -38,6 +37,9 @@ class abgd_vm_copy(torch.optim.Optimizer):
     def step(self, closure=None):
 
         self.params_to_np()
+        if self.t == 1:
+            self._find_lr(closure)
+            self.t = 1
         self._update_params(closure)
         self.np_to_params()
 
@@ -61,10 +63,10 @@ class abgd_vm_copy(torch.optim.Optimizer):
             self.x = xx
 
         loss0 = closure()
-        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 10))
+        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
         self.lr = self.step_g
 
-    
+
 
 
     def find_d(self):

@@ -27,12 +27,12 @@ import os
 # from optimiser_ADAM2 import adam2
 
 ### parameters
-#    [0    , 1    , 2   , 3  , 4      , 5      , 6     , 7           , 8          , 9]
-#    [ABGDc, ABGDv, ADAM, GDM, ABGDvmd, ABGDcm2, ABGDvm, ABGDcm2_copy, ABGDvm_copy, RDM]
-lr = [0.1  , 0.1  , 1e-3, 0.5, 0.1    , 1e+1   , 1e+1  , 1e+1        , 232     , 1e+1]
-opt_list = [2,5,7,8] # list of optimizers to be applied
+#    [0    , 1    , 2   , 3  , 4      , 5      , 6     ]
+#    [ABGDc, ABGDv, ADAM, GDM, ABGDvmd, ABGDcm2, ABGDvm]
+lr = [0.1  , 0.1  , 2e-1, 3e-1, 0.1    , 1e+1   , 1e+1  , 1e+1        , 1e-1       , 1e+1]
+opt_list = [2,3,5,6] # list of optimizers to be applied
 
-max_iterations = 150 # maximum number of iterations
+max_iterations = 200 # maximum number of iterations
 
 
 
@@ -71,22 +71,22 @@ max_iterations = 150 # maximum number of iterations
 
 # #########  Rosenbrock test function  #################
 
-# from test_function_rosenbrock import rosenbrock_main as func_main
-# from test_function_rosenbrock import rosenbrock_grad as func_grad
-#
-# x_start = np.array([0.5, 1.5])
-# d = 2
-#
-# x_min = -0.2
-# x_max = 1.5
-# y_min = -0.5
-# y_max = 2.0
-# x_opt = 0
-# y_opt = 0
-# log_plot = True
-# convergence_plt_title = "Convergence - Rosenbrock Function"
-# trajectory_plt_title = "Trajectories - Rosenbrock Function"
-#
+from test_function_rosenbrock import rosenbrock_main as func_main
+from test_function_rosenbrock import rosenbrock_grad as func_grad
+
+x_start = np.array([0.5, 1.5])
+d = 2
+
+x_min = -0.2
+x_max = 1.5
+y_min = -0.5
+y_max = 2.0
+x_opt = 0
+y_opt = 0
+log_plot = True
+convergence_plt_title = "Convergence - Rosenbrock Function"
+trajectory_plt_title = "Trajectories - Rosenbrock Function"
+
 
 #########  easom test function  #################
 
@@ -109,18 +109,18 @@ max_iterations = 150 # maximum number of iterations
 
 #########  Quadratic test function  #################
 
-from test_function_matyas import matyas_main as func_main
-from test_function_matyas import matyas_grad as func_grad
-d = 2
-x_start = np.array([100, 2000])
-x_min = -020.0
-x_max = 220.0
-y_min = -220.0
-y_max = 2220
-log_plot = True
-convergence_plt_title = "Convergence - Quadratic Function"
-trajectory_plt_title = "Trajectories - Quadratic Function"
-
+# from test_function_matyas import matyas_main as func_main
+# from test_function_matyas import matyas_grad as func_grad
+# d = 2
+# x_start = np.array([100, 2000])
+# x_min = -020.0
+# x_max = 220.0
+# y_min = -220.0
+# y_max = 2220
+# log_plot = True
+# convergence_plt_title = "Convergence - Quadratic Function"
+# trajectory_plt_title = "Trajectories - Quadratic Function"
+#
 
 
 ############ import optimizers ###############

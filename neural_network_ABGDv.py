@@ -36,37 +36,12 @@ class abgd_v(torch.optim.Optimizer):
     def step(self, closure=None):
 
         self.params_to_np()
-        if self.t == 1:
-            self._find_lr(closure)
-            self.t = 1
         self._update_params(closure)
         self.np_to_params()
 
         return
 
 
-
-
-    def _find_lr(self, closure):
-        self.step_g = self.lr / 1000
-        xx = self.x[:]
-        loss0 = closure()
-        loss2 = loss0
-        loss1 = loss0
-
-        while not loss2 > loss1:
-            loss1 = loss2
-            self.step_g = 10 * self.step_g
-            self._update_params(closure)
-            loss2 = closure()
-            self.x = xx
-
-        loss0 = closure()
-        self.step_g = float('{:0.1e}'.format( (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
-        self.lr = self.step_g
-
-
-    
 
 
     def find_d(self):

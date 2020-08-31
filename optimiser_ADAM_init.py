@@ -8,5 +8,5 @@ self.x_s = np.zeros(self.d)
 self.g_m1_normed = np.zeros(self.d)
 self.x = np.zeros(self.d)
 
-self.step_g = self.lr
+self.step_m = self.lr
 
