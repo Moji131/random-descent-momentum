@@ -82,7 +82,7 @@ class adam():
         p = m_hat / (np.sqrt(v_hat) + epsilon)
 
         if self.t == 1:
-            n_step_min = 5
+            n_step_min = 1
             self.step_m = self._find_step_m(closure, self.step_m, p, n_step_min)  # finding initial step size
             self.lr = self.step_m
 

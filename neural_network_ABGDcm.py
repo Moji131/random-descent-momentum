@@ -9,7 +9,8 @@ import optimiser_ABGDcm
 
 
 class abgd_cm(torch.optim.Optimizer):
-    def __init__(self, params, lr=0.01, beta_list = [0,0.9, 0.93], beta2_list = [0.999,0.999,0.999], find_lr = True, reset_min = True, cal_step_g = True):
+    def __init__(self, params, lr=0.01, beta_list = [0, 0.9, 0.93], find_lr = True, reset_min = True):
+    # def __init__(self, params, lr=0.01, beta_list = [0,0.9, 0.93], beta2_list = [0.999,0.999,0.999], find_lr = True, reset_min = True, cal_step_g = True):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))

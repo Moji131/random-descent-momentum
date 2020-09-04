@@ -39,11 +39,11 @@ epochs = 40000
 
 ###### random data #########
 
-N = 500
-D_in, H1, D_out = 1,40, 1
+N = 700
+D_in, H1, D_out = 2,40, 1
 
 # Create random Tensors to hold inputs and outputs
-torch.manual_seed(51)
+torch.manual_seed(66)
 x_train = torch.randn(N, D_in)
 y_train = torch.randn(N, D_out)
 

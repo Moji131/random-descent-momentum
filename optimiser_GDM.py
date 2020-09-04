@@ -21,7 +21,7 @@ class gdm():
     def _update_params(self, closure):
 
         if self.t == 1:
-            n_step_min = 5
+            n_step_min = 10
             o = np.zeros(self.d)
             o[:] = self.g[:]
             self.step_m = self._find_step_m(closure, self.step_m, o, n_step_min)  # finding initial step size

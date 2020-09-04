@@ -305,7 +305,7 @@ for f in files:
     file_path = path + "/" + f
     os.remove(file_path)
 
-path = "outputs/neural_network_minibatch/train"
+path = "outputs/neural_network_`batch/train"
 if not os.path.exists(path):
     os.makedirs(path)
 files = os.listdir(path)
@@ -370,6 +370,8 @@ for epoch_i in range(epochs):
 
             # Backward pass: compute gradient of the loss with respect to model parameters
             loss_train.backward()
+
+            optimizer[opt_i].loss1 = loss_train.data.item()
 
             # Calling the step function on an Optimizer makes an update to its parameters
             optimizer[opt_i].step(closure=closure_list[opt_i])

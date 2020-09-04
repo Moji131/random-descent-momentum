@@ -32,7 +32,7 @@ import os
 lr = [0.1  , 0.1  , 2e-1, 3e-1, 0.1    , 1e+1   , 1e+1  , 1e+1        , 1e-1       , 1e+1]
 opt_list = [2,3,5,6] # list of optimizers to be applied
 
-max_iterations = 200 # maximum number of iterations
+max_iterations =3 # maximum number of iterations
 
 
 
@@ -151,13 +151,13 @@ for t in range(1,max_iterations):
     print(t)
 
     for opt_i in opt_list:
-
+        fv = func_main(optimizer[opt_i].x)
+        optimizer[opt_i].loss1 = fv
         optimizer[opt_i].g = func_grad(optimizer[opt_i].x)
-        optimizer[opt_i].t = t
         optimizer[opt_i].step(closure_list[opt_i])
         x_out[opt_i] = np.append(x_out[opt_i], [optimizer[opt_i].x], axis=0)
         t_out[opt_i] = np.append(t_out[opt_i], [t], axis=0)
-        fv = func_main(optimizer[opt_i].x)
+
 
         lr1 =  str( optimizer[opt_i].lr )
         lr1 = "-lr=" + lr1
