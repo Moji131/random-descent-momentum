@@ -26,7 +26,8 @@ self.ind_d_list_m1 = np.ones(sh)
 sh = (self.beta_size, 1)
 self.vd_list = np.zeros(sh)
 
-self.delay = 1
+self.delay_step_up = 1
+self.delay_step = int(2/self.alpha_list[self.m_i])
 
 self.loss0 = 0
 self.loss1 = 0

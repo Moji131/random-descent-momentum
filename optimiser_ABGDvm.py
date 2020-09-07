@@ -34,7 +34,7 @@ class abgd_vm():
         # calculating output
         self.output = self.m_list[self.m_i] / np.linalg.norm(self.m_list[self.m_i])  # normalized momentum
         if self.t == 1 and self.find_lr:  # calculate step_m if this is step 1
-            n_step_min = 5
+            n_step_min = 1
             self.step_m = self._find_step_m(closure, self.step_m, self.output, n_step_min)  # finding initial step size
             self.lr = self.step_m
 
@@ -46,17 +46,20 @@ class abgd_vm():
             self.ind_d_list[i_m] = np.linalg.norm(self.md_list[i_m]) / self.vd_list[i_m]
 
         # adjusting step_m
-        scale_step_m = 1 + self.alpha_list[self.m_i]
-        if self.ind_d_list[self.m_i,0] < 0.3:
-            self.step_m = self.step_m / 2
-            self.delay = 1
-        elif self.ind_d_list[self.m_i,0] < self.ind_d_list_m1[self.m_i,0]: # decrease step for low indicator
-            self.step_m = self.step_m / scale_step_m
-            self.delay = 1
-        elif self.delay > 0 : # increase step for high indicator
-            self.delay = self.delay - 1
+        if self.delay_step <= 0 :
+            scale_step_m = 1 + self.alpha_list[self.m_i]
+            if self.ind_d_list[self.m_i,0] < 0.3:
+                self.step_m = self.step_m / 2
+                self.delay_step_up = 1
+            elif self.ind_d_list[self.m_i,0] < self.ind_d_list_m1[self.m_i,0]: # decrease step for low indicator
+                self.step_m = self.step_m / scale_step_m
+                self.delay_step_up = 1
+            elif self.delay_step_up > 0 : # increase step for high indicator
+                self.delay_step_up = self.delay_step_up - 1
+            else:
+                self.step_m = self.step_m * scale_step_m
         else:
-            self.step_m = self.step_m * scale_step_m
+            self.delay_step = self.delay_step -1
 
 
         # update x
@@ -71,6 +74,7 @@ class abgd_vm():
         # decide if change momentum
         if self.m_i > 0 and self.ind_d_list[self.m_i, 0] < 0.3:
             self.m_i = self.m_i - 1
+            # self.delay_step = int(2 / self.alpha_list[self.m_i])
             if self.reset_min: # reset to minimum found till now
                 self.x = self.x_min  # reset position to min found till now
                 for i_m in range(self.beta_size): # reset all momentum to zero
@@ -79,6 +83,7 @@ class abgd_vm():
             if self.ind_d_list[self.m_i+1, 0] > self.ind_d_list[self.m_i, 0]:
                 self.m_i = self.m_i + 1
                 self.step_m = np.linalg.norm(self.ms_list[self.m_i])
+                # self.delay_step = int(2 / self.alpha_list[self.m_i])
 
 
 

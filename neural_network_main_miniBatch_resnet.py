@@ -18,15 +18,16 @@ from resnet import *
 
 ############ settings #######################
 opt_n = 7
-#    [0    , 1    , 2    , 3   , 4      , 5      , 6     ]
-#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm]
-lr = [0.1  , 0.1  , 1e-2 , 3e-4, 0.1    , 1e-1   , 1e-2  ]
-opt_list = [2, 3, 5, 6] # list of optimizers to be applied
+#    [0    , 1    , 2    , 3    , 4      , 5     , 6     ]
+#    [ABGDc, ABGDc, ADAM , GDM  , ABGDvmd, ABGDcm, ABGDvm]
+lr = [1e-1 , 1e-1 , 1e-2 , 1e-1 , 1e-1   , 1e-1  , 1e-1  ]
+# opt_list = [2, 3, 5, 6] # list of optimizers to be applied
+opt_list = [3] # list of optimizers to be applied
 
 
 save_count = 1
 print_count = 1
-epochs = 200
+epochs = 300
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -287,7 +288,7 @@ exec(open("./neural_netwrok_optimizers.py").read())
 # closure_list[7] = None
 
 
-######  creating files to output data ########
+######  creating folders to output data ########
 ##############################################
 path = "outputs/neural_network/train"
 if not os.path.exists(path):
@@ -305,7 +306,7 @@ for f in files:
     file_path = path + "/" + f
     os.remove(file_path)
 
-path = "outputs/neural_network_`batch/train"
+path = "outputs/neural_network_minibatch/train"
 if not os.path.exists(path):
     os.makedirs(path)
 files = os.listdir(path)

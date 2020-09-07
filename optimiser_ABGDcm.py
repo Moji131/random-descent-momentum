@@ -54,17 +54,21 @@ class abgd_cm():
             self.ind_d_list[i_m] = np.linalg.norm(self.md_list[i_m]) / self.vd_list[i_m]
 
         # adjusting step_m
-        scale_step_m = 1 + self.alpha_list[self.m_i]
-        if self.ind_d_list[self.m_i, 0] < 0.3:
-            self.step_m = self.step_m / 2
-            self.delay = 1
-        elif self.ind_d_list[self.m_i, 0] < self.ind_d_list_m1[self.m_i, 0]:  # decrease step for low indicator
-            self.step_m = self.step_m / scale_step_m
-            self.delay = 1
-        elif self.delay > 0:  # increase step for high indicator
-            self.delay = self.delay - 1
+        print("self.delay_step", self.delay_step)
+        if self.delay_step <= 0:
+            scale_step_m = 1 + self.alpha_list[self.m_i]
+            if self.ind_d_list[self.m_i, 0] < 0.3:
+                self.step_m = self.step_m / 2
+                self.delay_step_up = 1
+            elif self.ind_d_list[self.m_i, 0] < self.ind_d_list_m1[self.m_i, 0]:  # decrease step for low indicator
+                self.step_m = self.step_m / scale_step_m
+                self.delay_step_up = 1
+            elif self.delay_step_up > 0:  # increase step for high indicator
+                self.delay_step_up = self.delay_step_up - 1
+            else:
+                self.step_m = self.step_m * scale_step_m
         else:
-            self.step_m = self.step_m * scale_step_m
+            self.delay_step = self.delay_step - 1
 
         # update x
         print("ABGDcm update. momentum, step_m:", self.beta_list[self.m_i], self.step_m)
@@ -78,6 +82,7 @@ class abgd_cm():
         # decide if change momentum
         if self.m_i > 0 and self.ind_d_list[self.m_i, 0] < 0.3:
             self.m_i = self.m_i - 1
+            # self.delay_step = int(2 / self.alpha_list[self.m_i])
             if self.reset_min:  # reset to minimum found till now
                 self.x = self.x_min  # reset position to min found till now
                 for i_m in range(self.beta_size):  # reset all momentum to zero
@@ -86,6 +91,7 @@ class abgd_cm():
             if self.ind_d_list[self.m_i + 1, 0] > self.ind_d_list[self.m_i, 0]:
                 self.m_i = self.m_i + 1
                 self.step_m = np.linalg.norm(self.ms_list[self.m_i])
+                # self.delay_step = int(2 / self.alpha_list[self.m_i])
 
 
         ######## ouput indicators to file
@@ -370,11 +376,11 @@ class abgd_cm():
 #             print(self.ind_d_list[self.m_i,0])
 #             if self.ind_d_list[self.m_i,0] < 0.5:
 #                 self.step_g = 0.5 * self.step_g
-#                 self.delay = 1
-#             elif self.ind_d_list[self.m_i,0] > 0.6 and self.delay < 1:
+#                 self.delay_step_up = 1
+#             elif self.ind_d_list[self.m_i,0] > 0.6 and self.delay_step_up < 1:
 #                 self.step_g = 2.0 * self.step_g
 #             else:
-#                 self.delay = self.delay - 1
+#                 self.delay_step_up = self.delay_step_up - 1
 #         else: # for momentum nonzero
 #             scale_step_m = 1 + (1-self.beta_list[self.m_i]) * 0.1
 #             # scale_step_m = 1
@@ -390,7 +396,7 @@ class abgd_cm():
 #             self.m_i = self.m_i - 1
 #             if self.beta_list[self.m_i] == 0 and self.cal_step_g: # if momentum is zero recalculate step_g
 #                 self.step_g = self._find_step_g(closure, self.step_m, self.m_list[self.m_i])
-#                 self.delay = 1
+#                 self.delay_step_up = 1
 #             else:
 #                 self.step_g = self.step_g
 #             if self.reset_min: # reset x to x_min of minimum loss till now
