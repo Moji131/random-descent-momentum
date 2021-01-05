@@ -1,7 +1,11 @@
-import numpy as np
 
-class adam():
-    def __init__(self, params, lr=0.01):
+
+import random
+import numpy as np
+import random as rn
+
+class rdm3():
+    def __init__(self, params, lr=0.01, momentum = 0.9):
 
         self.lr = lr
 
@@ -11,30 +15,113 @@ class adam():
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ADAM_init.py").read())
+        exec(open("./optimiser_RDM3_init.py").read())
 
 
 
     def _update_params(self, closure):
-        beta_1 = 0.9
-        beta_2 = 0.999
-        epsilon = 1.0e-08
 
-        self.m = beta_1 * self.m + (1 - beta_1) * self.g
-        self.v = beta_2 * self.v + (1 - beta_2) * np.power(self.g, 2)
-        m_hat = self.m / (1 - beta_1**self.t)
-        v_hat = self.v / (1 - beta_2**self.t)
-        p = m_hat / (np.sqrt(v_hat) + epsilon)
+        # n_sample = 1
+        #
+        # self.loss1 =  0
+        # for i in range(n_sample):
+        #     self.loss1 = self.loss1 + closure()
+        # self.loss1 = self.loss1 / n_sample
 
-        if self.t == 1:
-            n_step_min = 0.3
-            self.step_m = self._find_step_m(closure, self.step_m, p, n_step_min)  # finding initial step size
-            self.lr = self.step_m
 
-        self.x = self.x - self.step_m * p
+
+
+        norm_m = np.linalg.norm(self.m)
+        if norm_m * self.step_m < 0.0001: # limit on how small sampling distance can be for experimental cases
+            print("RDM3, norm_m too small", norm_m)
+            norm_m = 0.0001 / self.step_m
+        vec = np.array([rn.gauss(0, 1) for i in range(self.d)])
+        dot = np.dot(vec,self.m)
+        par = self.m * dot / norm_m / norm_m
+        perpen = vec - par
+        mag = np.sum(perpen ** 2) ** .5
+        perpen = perpen / mag * norm_m
+        delta = perpen / 1
+
+
+
+
+        p = self.m + delta
+        p = p / np.linalg.norm(p)
+
+        self.x = self.x - p * self.step_m
+        n_sample = 1
+        f1 = 0
+        for i in range(n_sample):
+            f1 = f1 + closure()
+        f1 = f1 / n_sample
+
+        if f1 < self.loss1:
+            dx =  - p * self.step_m
+            dx_norm = np.linalg.norm(dx)
+            dx_normed = dx / dx_norm
+            ghat_norm = (f1-self.loss1) / dx_norm
+            ghat = ghat_norm * dx_normed
+
+            self.m = self.beta * self.m + (1 - self.beta) * ghat
+            self.step_m = self.step_m * 1.1
+        else:
+            self.x = self.x + p * self.step_m
+            higher = True
+            while higher:
+                self.step_m = self.step_m / 1.1
+                vec = np.array([rn.gauss(0, 1) for i in range(self.d)])
+                mag = np.sum(perpen ** 2) ** .5
+                vec = vec/mag
+                self.x = self.x + vec * self.step_m
+                f1 = closure()
+                if f1 < self.loss1:
+                    higher = False
+                else:
+                    self.x = self.x - vec * self.step_m
+
 
         self.t = self.t + 1
+        self.loss_m1 = self.loss1
 
+
+    #
+    # def _update_params(self, closure):
+    #
+    #
+    #     dx = self.dx
+    #     dx_norm = np.linalg.norm(dx)
+    #     dx_normed = dx / dx_norm
+    #     ghat_norm = (self.loss_m1 - self.loss1) / dx_norm
+    #     ghat = ghat_norm * dx_normed
+    #
+    #     norm_m = np.linalg.norm(self.m)
+    #     if norm_m < 0.0001: # limit on how small sampling distance can be for experimental cases
+    #         norm_m = 0.0001
+    #
+    #     vec = np.array([rn.gauss(0, 1) for i in range(self.d)])
+    #     mag = np.sum(vec ** 2) ** .5
+    #     vec = vec / mag * norm_m
+    #
+    #     if norm_m < 0.0001: # limit on how small sampling distance can be for experimental cases
+    #         self.m = vec
+    #
+    #     self.x = self.x + vec * self.step_m
+    #
+    #     loss_r = closure()
+    #     dx = vec * self.step_m
+    #     dx_norm = np.linalg.norm(dx)
+    #     dx_normed = dx / dx_norm
+    #     ghat_norm = (loss_r - self.loss1) / dx_norm
+    #     ghat = ghat + ghat_norm * dx_normed
+    #
+    #     self.m = self.beta * self.m + (1 - self.beta) * ghat
+    #
+    #     self.x = self.x - vec * self.step_m - self.m * self.step_m
+    #     self.dx = - self.m * self.step_m
+    #
+    #     self.t = self.t + 1
+    #     self.loss_m1 = self.loss1
 
 
 
@@ -44,8 +131,10 @@ class adam():
 
 
 
+
+
     def _find_step_m(self, closure, step, o, n_step_min = 10):
-        print("ADAM, _find_step_m:")
+        print("GDM, _find_step_m:")
 
         s = np.zeros(5)
         # stage1_step = np.array([])
@@ -189,13 +278,24 @@ class adam():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 #
 #
 #
 # import numpy as np
 #
-# class adam():
-#     def __init__(self, params, lr=0.01):
+# class rdm():
+#     def __init__(self, params, lr=0.01, momentum = 0.95):
 #
 #         self.lr = lr
 #
@@ -205,41 +305,67 @@ class adam():
 #         self.g = np.zeros(self.d)
 #
 #         ##### initialising parameters specific to the algorithm #######
-#         exec(open("./optimiser_ADAM_init.py").read())
+#         exec(open("./optimiser_RDM_init.py").read())
 #
 #
 #
-#     def _update_params(self):
-#         beta_1 = 0.9
-#         beta_2 = 0.999
-#         epsilon = 1.0e-08
+#     def _update_params(self, closure):
 #
-#         self.m = beta_1 * self.m + (1 - beta_1) * self.g
-#         self.v = beta_2 * self.v + (1 - beta_2) * np.power(self.g, 2)
-#         m_hat = self.m / (1 - beta_1**self.t)
-#         v_hat = self.v / (1 - beta_2**self.t)
+#         if self.t == 1:
+#             l = closure()
+#             p = np.random.random(self.d)
+#             p_normed = p / np.linalg.norm(p)
+#         else:
+#             l = closure()
+#             g = (l-self.l_m1) * (self.x - self.x_m1) / self.step_g /self.step_g
+#             self.m = self.momentum * self.m +  g
+#             m_normed = self.m / np.linalg.norm(self.m)
 #
-#         g_0_sign = np.sign(self.g)  # sign of the components of gradient
-#         a_sign = np.sign((m_hat) / (np.sqrt(v_hat) + epsilon))
-#         m_g_0 = a_sign * g_0_sign # check if momentum and gradient have the same sign.
-#         self.lr = np.where( m_g_0 == -1, self.lr*0.5, self.lr*2) #state 1. going against the gradient because of momentum. half the step.
+#             s = np.random.random(self.d)
+#             s_normed = s / np.linalg.norm(s)
+#             s_m_dot = np.dot(s_normed, m_normed)
+#             s_perp = s_normed - m_normed * s_m_dot
 #
+#             p =  m_normed + s_perp
+#             p_normed = p / np.linalg.norm(p)
 #
-#         self.x = self.x - self.lr * a_sign
+#         self.x_m1 = self.x
+#         self.x = self.x - p_normed * self.step_g
 #
-#         # self.x = self.x - (self.lr * m_hat) / (np.sqrt(v_hat) + epsilon)
-#
-#
-#
-#     def step(self, closure = None):
-#         self._update_params()
-#
-#
+#         self.l_m1 = l
 #
 #
-
-
-
-
-
-
+#
+#
+#     def step(self, closure):
+#         # if self.t == 1:
+#         #     self._find_lr(closure)
+#         #     self.t = 1
+#         self.step_g = self.lr
+#         self._update_params(closure)
+#
+#     def _find_lr(self, closure):
+#         self.step_g = self.lr / 1000
+#         xx = self.x[:]
+#         loss0 = closure()
+#         loss2 = loss0
+#         loss1 = loss0
+#
+#         while not loss2 > loss1:
+#             loss1 = loss2
+#             self.step_g = 10 * self.step_g
+#             self._update_params(closure)
+#             loss2 = closure()
+#             self.x = xx
+#
+#         loss0 = closure()
+#         self.step_g = float('{:0.1e}'.format(
+#             (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
+#         self.lr = self.step_g
+#
+#
+#
+#
+#
+#
+#

@@ -10,8 +10,8 @@ import pickle
 import os
 import numpy as np
 
-from neural_network_ABGDc import abgd_c
-from neural_network_ABGDv import abgd_v
+from neural_network_ALR_GDc import abgd_c
+from neural_network_ALR_GD import abgd_v
 from neural_network_ABGDcs import abgd_cs
 from neural_network_ABGDcsd import abgd_csd
 from neural_network_ABGDvmd import abgd_vmd

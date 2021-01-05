@@ -1,10 +1,11 @@
 
 
-
+import random
 import numpy as np
+import random as rn
 
-class gdm():
-    def __init__(self, params, lr=0.01, momentum = 0.9):
+class spsa():
+    def __init__(self, params, lr=0.01, momentum = 0.95):
 
         self.lr = lr
 
@@ -14,23 +15,100 @@ class gdm():
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_GDM_init.py").read())
+        exec(open("./optimiser_SPSA_init.py").read())
 
 
 
     def _update_params(self, closure):
 
-        self.m = self.beta * self.m + (1-self.beta) *  self.g
+        n_sample = 1
+        n_skip = n_sample * 2
 
-        # if self.t == 1:
-        #     n_step_min = 10
-        #     self.step_m = self._find_step_m(closure, self.step_m, self.m, n_step_min)  # finding initial step size
-        #     self.lr = self.step_m
+        if self.t % n_skip == 0:
+        # if True:
+
+            # self.loss1 =  0
+            # for i in range(n_sample):
+            #     self.loss1 = self.loss1 + closure()
+            # self.loss1 = self.loss1 / n_sample
+
+            # ghat = (self.loss1 - self.loss_m1) / self.dx
+
+            k= int(self.t/n_skip)
+
+            delta = np.random.binomial(1, p=0.5, size=(self.d)) * 2. - 1.0
+            s=0.602
+            t=0.101
+            a=self.lr
+            b=self.lr
+            A_=20
+            # alpha_k = a / (k + 1 + A_) ** s
+            # beta_k = b / (k + 1) ** t
+
+            alpha_k = a
+            beta_k = b
+
+            f1 = 0
+            f2 = 0
+            for i in range(n_sample):
+                self.x = self.x + beta_k * delta
+                f1 = f1 + closure()
+                self.x = self.x - 2 * beta_k * delta
+                f2 = f2 + closure()
+                self.x = self.x + beta_k * delta
+            f1 = f1 / n_sample
+            f2 = f2 / n_sample
 
 
-        self.x = self.x - self.m * self.step_m
+            ghat = (((f2 - f1) / beta_k) * delta)
 
-        self.t = self.t + 1
+            self.x = self.x + alpha_k * ghat
+
+            self.t = self.t + 1
+            self.loss_m1 = self.loss1
+        else:
+            self.t = self.t + 1
+            pass
+
+    #
+    # def _update_params(self, closure):
+    #
+    #
+    #     dx = self.dx
+    #     dx_norm = np.linalg.norm(dx)
+    #     dx_normed = dx / dx_norm
+    #     ghat_norm = (self.loss_m1 - self.loss1) / dx_norm
+    #     ghat = ghat_norm * dx_normed
+    #
+    #     norm_m = np.linalg.norm(self.m)
+    #     if norm_m < 0.0001: # limit on how small sampling distance can be for experimental cases
+    #         norm_m = 0.0001
+    #
+    #     vec = np.array([rn.gauss(0, 1) for i in range(self.d)])
+    #     mag = np.sum(vec ** 2) ** .5
+    #     vec = vec / mag * norm_m
+    #
+    #     if norm_m < 0.0001: # limit on how small sampling distance can be for experimental cases
+    #         self.m = vec
+    #
+    #     self.x = self.x + vec * self.step_m
+    #
+    #     loss_r = closure()
+    #     dx = vec * self.step_m
+    #     dx_norm = np.linalg.norm(dx)
+    #     dx_normed = dx / dx_norm
+    #     ghat_norm = (loss_r - self.loss1) / dx_norm
+    #     ghat = ghat + ghat_norm * dx_normed
+    #
+    #     self.m = self.beta * self.m + (1 - self.beta) * ghat
+    #
+    #     self.x = self.x - vec * self.step_m - self.m * self.step_m
+    #     self.dx = - self.m * self.step_m
+    #
+    #     self.t = self.t + 1
+    #     self.loss_m1 = self.loss1
+
+
 
 
     def step(self, closure):
@@ -190,3 +268,89 @@ class gdm():
 
 
 
+
+
+
+
+
+
+#
+#
+#
+# import numpy as np
+#
+# class rdm():
+#     def __init__(self, params, lr=0.01, momentum = 0.95):
+#
+#         self.lr = lr
+#
+#         self.d = len(params)
+#
+#         self.x = np.zeros(self.d)
+#         self.g = np.zeros(self.d)
+#
+#         ##### initialising parameters specific to the algorithm #######
+#         exec(open("./optimiser_RDM_init.py").read())
+#
+#
+#
+#     def _update_params(self, closure):
+#
+#         if self.t == 1:
+#             l = closure()
+#             p = np.random.random(self.d)
+#             p_normed = p / np.linalg.norm(p)
+#         else:
+#             l = closure()
+#             g = (l-self.l_m1) * (self.x - self.x_m1) / self.step_g /self.step_g
+#             self.m = self.momentum * self.m +  g
+#             m_normed = self.m / np.linalg.norm(self.m)
+#
+#             s = np.random.random(self.d)
+#             s_normed = s / np.linalg.norm(s)
+#             s_m_dot = np.dot(s_normed, m_normed)
+#             s_perp = s_normed - m_normed * s_m_dot
+#
+#             p =  m_normed + s_perp
+#             p_normed = p / np.linalg.norm(p)
+#
+#         self.x_m1 = self.x
+#         self.x = self.x - p_normed * self.step_g
+#
+#         self.l_m1 = l
+#
+#
+#
+#
+#     def step(self, closure):
+#         # if self.t == 1:
+#         #     self._find_lr(closure)
+#         #     self.t = 1
+#         self.step_g = self.lr
+#         self._update_params(closure)
+#
+#     def _find_lr(self, closure):
+#         self.step_g = self.lr / 1000
+#         xx = self.x[:]
+#         loss0 = closure()
+#         loss2 = loss0
+#         loss1 = loss0
+#
+#         while not loss2 > loss1:
+#             loss1 = loss2
+#             self.step_g = 10 * self.step_g
+#             self._update_params(closure)
+#             loss2 = closure()
+#             self.x = xx
+#
+#         loss0 = closure()
+#         self.step_g = float('{:0.1e}'.format(
+#             (self.step_g / 10 + (loss0 - loss1) * (self.step_g - self.step_g / 10) / (loss2 - loss1)) / 20))
+#         self.lr = self.step_g
+#
+#
+#
+#
+#
+#
+#

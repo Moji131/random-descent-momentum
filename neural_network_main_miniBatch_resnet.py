@@ -20,14 +20,14 @@ from resnet import *
 opt_n = 7
 #    [0    , 1    , 2    , 3    , 4      , 5     , 6     ]
 #    [ABGDc, ABGDc, ADAM , GDM  , ABGDvmd, ABGDcm, ABGDvm]
-lr = [1e-1 , 1e-1 , 1e-2 , 1e-1 , 1e-1   , 1e-1  , 1e-1  ]
+lr = [1e-1 , 1e-1 , 1e-3 , 1e-1 , 1e-1   , 5e-1  , 5e-1  ]
 # opt_list = [2, 3, 5, 6] # list of optimizers to be applied
-opt_list = [3] # list of optimizers to be applied
+opt_list = [5] # list of optimizers to be applied
 
 
 save_count = 1
 print_count = 1
-epochs = 300
+epochs = 400
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -401,7 +401,7 @@ for epoch_i in range(epochs):
             # saving train loss to file
             str1 = 'outputs/neural_network_minibatch/train/' + name[opt_i] + "-lr=" + str(optimizer[opt_i].lr)
             file[opt_i] = open(str1, 'a')
-            t_batch = mbacth_i + epoch_i * train_szie/batch_size
+            t_batch = mbacth_i + epoch_i * train_szie/batch_size + 1
             str_to_file = str(t_batch) + "\t" + \
                 str(loss_train.data.item()) + "\n"
             file[opt_i].write(str_to_file)

@@ -1,17 +1,17 @@
 import torch
 import numpy as np
 import copy
-import optimiser_ABGDc
+import optimiser_ALR_GDc
 from torch.autograd import Variable
 import copy
 
-class abgd_c(torch.optim.Optimizer):
+class ALR_GDc(torch.optim.Optimizer):
     def __init__(self, params, lr=0.001, min_step_r=2**20, max_step_r=2**20):
         if lr < 0.0:
             raise ValueError("Invalid learning rate: {}."
                              " It must be non-negative.".format(lr))
         defaults = dict(lr=lr)
-        super(abgd_c, self).__init__(params, defaults)
+        super(ALR_GDc, self).__init__(params, defaults)
         self._params = self.param_groups[0]['params']
 
         self.lr = lr
@@ -23,12 +23,13 @@ class abgd_c(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDc_init.py").read())
+        exec(open("./optimiser_ALR_GDc_init.py").read())
 
 
 
 
-    _update_params = optimiser_ABGDc.abgd_c._update_params
+    _update_params = optimiser_ALR_GDc.ALR_GDc._update_params
+    _find_step_m = optimiser_ALR_GDc.ALR_GDc._find_step_m
 
 
     @torch.no_grad()

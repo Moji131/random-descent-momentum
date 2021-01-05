@@ -7,4 +7,7 @@ self.g_m1_sign = np.ones(self.d)   # get the sign of the components
 self.g_m1_m2 = np.ones(self.d)  # initialising product of sign of gradient of step_g 0 and -1
 
 
+self.t = 1
+
+
 

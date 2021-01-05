@@ -16,7 +16,7 @@ class abgd_cm():
 
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDcm_init.py").read())
+        exec(open("./optimiser_ALR_ADAM_init.py").read())
 
 
 

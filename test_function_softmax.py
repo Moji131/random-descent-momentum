@@ -112,69 +112,69 @@ def softmax(X, Y, w, arg=None, reg=None, HProp=None, gProp=None):
 #######################################################
 
 ############# This section for random data generation ###############
-rand.seed(3)
-n = 300
-d = 50
-total_C = 2
-# X = rand.randn(n, d)   #Let X be a random matrix
-A = rand.randn(n, d)
-cond_number = 1
-D = np.logspace(1, cond_number, d)
-X = A*D  # set X as a ill conditioned Matrix
-I = np.eye(total_C, total_C - 1)
-ind = rand.randint(total_C, size=n)
-Y = I[ind, :]
-description = "Softmax - Random Data, d=" + str(d) + ", n=" + str(n) + ", \n condition number = " + str(cond_number)
-
+# rand.seed(3)
+# n = 300
+# d = 50
+# total_C = 2
+# # X = rand.randn(n, d)   #Let X be a random matrix
+# A = rand.randn(n, d)
+# cond_number = 5
+# D = np.logspace(1, cond_number, d)
+# X = A*D  # set X as a ill conditioned Matrix
+# I = np.eye(total_C, total_C - 1)
+# ind = rand.randint(total_C, size=n)
+# Y = I[ind, :]
+# description = "Softmax - Random Data, d=" + str(d) + ", n=" + str(n) + ", \n condition number = " + str(cond_number)
+#
 
 
 
 ########### This section for loading MNIST ############
 
-#
-# import tensorflow as tf
-# from torchvision import datasets, transforms
-# import torch
-# from torch.utils.data import DataLoader
-# transform = transforms.ToTensor()
-#
-# d = 784
-# total_C = 10
-# n = 784
-#
-# transform = transforms.ToTensor()
-# train_set = datasets.MNIST("data/mnist/trainset", transform=transform, download=True)
-# test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
-# train_loader = DataLoader(train_set, batch_size=len(train_set))
-# test_loader = DataLoader(test_set, batch_size=len(test_set))
-#
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#
-# train_inputs, train_targets = iter(train_loader).next()
-# train_inputs = train_inputs.reshape(60000, 784).to(device)
-# train_targets = train_targets.reshape(60000,-1).to(device)
-#
-# test_inputs, test_targets = iter(test_loader).next()
-# test_inputs = test_inputs.reshape(10000, 784).to(device)
-# test_targets = test_targets.reshape(10000,-1).to(device)
-#
-# n_train =60000
-# x_train = train_inputs[0:n_train,:]
-# y_train = train_targets[0:n_train].float()
-#
-#
-# X = np.array(x_train)
-# Y = np.array(y_train)
-#
-# n_test =10000
-# x_test = test_inputs[0:n_test,:]
-# y_test = test_targets[0:n_test].float()
-#
-# description = "Softmax - MNIST, d=" + str(d) + ", n=" + str(n)
-#
-#
 
-############ This section for loading CIFAR10 ############
+import tensorflow as tf
+from torchvision import datasets, transforms
+import torch
+from torch.utils.data import DataLoader
+transform = transforms.ToTensor()
+
+d = 784
+total_C = 10
+n = 784
+
+transform = transforms.ToTensor()
+train_set = datasets.MNIST("data/mnist/trainset", transform=transform, download=True)
+test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
+train_loader = DataLoader(train_set, batch_size=len(train_set))
+test_loader = DataLoader(test_set, batch_size=len(test_set))
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+train_inputs, train_targets = iter(train_loader).next()
+train_inputs = train_inputs.reshape(60000, 784).to(device)
+train_targets = train_targets.reshape(60000,-1).to(device)
+
+test_inputs, test_targets = iter(test_loader).next()
+test_inputs = test_inputs.reshape(10000, 784).to(device)
+test_targets = test_targets.reshape(10000,-1).to(device)
+
+n_train =60000
+x_train = train_inputs[0:n_train,:]
+y_train = train_targets[0:n_train].float()
+
+
+X = np.array(x_train)
+Y = np.array(y_train)
+
+n_test =10000
+x_test = test_inputs[0:n_test,:]
+y_test = test_targets[0:n_test].float()
+
+description = "Softmax - MNIST, d=" + str(d) + ", n=" + str(n)
+
+
+
+########### This section for loading CIFAR10 ############
 
 # import tensorflow as tf
 # cifar10 = tf.keras.datasets.cifar10

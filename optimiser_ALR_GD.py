@@ -1,36 +1,55 @@
-
-
-
 import numpy as np
 
-class gdm():
-    def __init__(self, params, lr=0.01, momentum = 0.9):
 
-        self.lr = lr
+class ALR_GD():
+    def __init__(self, params, lr=0.01):
 
-        self.d = len(params)
+        self.lr = lr  # learning rate
+
+        self.d = len(params)  # input dimension
+
+
 
         self.x = np.zeros(self.d)
         self.g = np.zeros(self.d)
 
+
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_GDM_init.py").read())
+        exec(open("./optimiser_ALR_GD_init.py").read())
 
 
 
     def _update_params(self, closure):
 
-        self.m = self.beta * self.m + (1-self.beta) *  self.g
+        ### normalizing gradient
+        g_0_norm = np.linalg.norm(self.g)  # norm of the gradient
+        g_0_normed = self.g / g_0_norm  # normalized gradient
 
-        # if self.t == 1:
-        #     n_step_min = 10
-        #     self.step_m = self._find_step_m(closure, self.step_m, self.m, n_step_min)  # finding initial step size
-        #     self.lr = self.step_m
+        if self.t == 1:  # calculate step_m if this is step 1
+            n_step_min = 0.5
+            self.output = g_0_normed
+            self.step_g = self._find_step_m(closure, self.step_g, self.output, n_step_min)  # finding initial step size
+            self.lr = self.step_g
 
+        ### caculating step_g_g for the next iteration
+        g_0_m1_dot = np.dot(g_0_normed, self.g_m1_normed)
+        if g_0_m1_dot < 0:
+            self.step_g = self.step_g * 0.5
+        elif self.g_0_m1_dot_m1 < 0:
+            self.step_g = self.step_g * 1.0
+        else:
+            self.step_g = self.step_g * 2.0
 
-        self.x = self.x - self.m * self.step_m
+        ### updating parameters
+        self.x = self.x - g_0_normed * self.step_g
+
+        ### save values for the next step
+        self.g_m1_normed = g_0_normed
+        self.g_0_m1_dot_m1 = g_0_m1_dot
 
         self.t = self.t + 1
+
+
 
 
     def step(self, closure):
@@ -39,9 +58,29 @@ class gdm():
 
 
 
+    # def _find_lr(self, closure):
+    #     self.step_g = self.lr / 1000
+    #     xx = self.x[:]
+    #     loss0 = closure()
+    #     loss2 = loss0
+    #     loss1 = loss0
+    #
+    #     while not loss2 > loss1:
+    #         loss1 = loss2
+    #         self.step_g = 10 * self.step_g
+    #         self._update_params(closure)
+    #         loss2 = closure()
+    #         self.x = xx
+    #
+    #
+    #     loss0 = closure()
+    #     self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 20 ))
+    #     self.lr = self.step_g
+
+
 
     def _find_step_m(self, closure, step, o, n_step_min = 10):
-        print("GDM, _find_step_m:")
+        print("ALR-GD, _find_step_m:")
 
         s = np.zeros(5)
         # stage1_step = np.array([])
@@ -168,7 +207,7 @@ class gdm():
         # plt.axvline(x=sout)
         # plt.xlabel('step')
         # plt.ylabel('loss')
-        # plt.title('ABGDvm step finder')
+        # plt.title('ABGDcm step finder')
         # plt.show()
 
         print("step_min, error, step_out :", step_min , ds , sout)
@@ -176,17 +215,5 @@ class gdm():
         loss0 = closure()
 
         return sout
-
-
-
-
-
-
-
-
-
-
-
-
 
 

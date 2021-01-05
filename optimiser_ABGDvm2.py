@@ -13,7 +13,7 @@ class abgd_vm():
 
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDvm_init.py").read())
+        exec(open("./optimiser_ALR_GDM_init.py").read())
 
     def _update_params(self, closure):
 

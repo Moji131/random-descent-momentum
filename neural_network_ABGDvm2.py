@@ -4,7 +4,7 @@ import copy
 from torch.autograd import Variable
 import copy
 
-import optimiser_ABGDvm
+import optimiser_ALR_GDM
 
 
 
@@ -26,9 +26,9 @@ class abgd_vm(torch.optim.Optimizer):
         self.g = np.zeros(self.d)
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDvm_init.py").read())
+        exec(open("./optimiser_ALR_GDM_init.py").read())
 
-    _update_params = optimiser_ABGDvm.abgd_vm._update_params
+    _update_params = optimiser_ALR_GDM.abgd_vm._update_params
 
 
 

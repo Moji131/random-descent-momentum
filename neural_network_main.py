@@ -12,23 +12,18 @@ import numpy as np
 
 
 
-############ settings #######################
-# opt_n = 8 # number of optimizers
-# model = [0 for i in range(opt_n)] # list of models to be used with optimizers
-# opt_list = [ 1, 4, 7] # list of active optimizers
-# # opt_list = [0,2,4,6]
-
 ### parameters
 opt_n = 7
-#    [0    , 1    , 2    , 3   , 4      , 5      , 6     ]
-#    [ABGDc, ABGDc, ADAM , GDM , ABGDvmd, ABGDcm2, ABGDvm]
-lr = [0.1  , 0.1  , 1e-2 , 3e-4, 0.1    , 1e-1   , 1e-2  ]
+#    [0      , 1     , 2    , 3   , 4      , 5     , 6     ]
+#    [ALR_GDc, ALR_GD, ADAM , GDM , ABGDvmd, ALR-ADAM, ALR-GDM]
+lr = [0.1  , 0.1  , 1e-2 , 3e-4, 0.1    , 1e-1    , 1e-1  ]
+opt_list = [0,1,2, 3, 5, 6] # list of optimizers to be applied
+# opt_list = [ 3] # list of optimizers to be applied
 
-opt_list = [2, 3, 5, 6] # list of optimizers to be applied
 
 save_count = 1
 print_count = 1
-epochs = 40000
+epochs = 5000
 
 
 
@@ -39,49 +34,49 @@ epochs = 40000
 
 ###### random data #########
 
-N = 700
-D_in, H1, D_out = 2,40, 1
-
-# Create random Tensors to hold inputs and outputs
-torch.manual_seed(66)
-x_train = torch.randn(N, D_in)
-y_train = torch.randn(N, D_out)
-
-test_con = False
+# N = 10000
+# D_in, H1, D_out = 10,100, 1
+#
+# # Create random Tensors to hold inputs and outputs
+# torch.manual_seed(45)
+# x_train = torch.randn(N, D_in)
+# y_train = torch.randn(N, D_out)
+#
+# test_con = False
 
 
 
 ########## MNIST load #########
 
 
-# transform = transforms.ToTensor()
-# train_set = datasets.MNIST("data/mnist/trainset", transform=transform, download=True)
-# test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
-# train_loader = DataLoader(train_set, batch_size=len(train_set))
-# test_loader = DataLoader(test_set, batch_size=len(test_set))
-#
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#
-# train_inputs, train_targets = iter(train_loader).next()
-# train_inputs = train_inputs.reshape(60000, 784).to(device)
-# train_targets = train_targets.reshape(60000,-1).to(device)
-#
-# test_inputs, test_targets = iter(test_loader).next()
-# test_inputs = test_inputs.reshape(10000, 784).to(device)
-# test_targets = test_targets.reshape(10000,-1).to(device)
-#
-# n_train =60000
-# x_train = train_inputs[0:n_train,:]
-# y_train = train_targets[0:n_train].float()
-#
-# n_test =10000
-# x_test = test_inputs[0:n_test,:]
-# y_test = test_targets[0:n_test].float()
-#
-# # D_in is input dimension; Hs are hidden dimensions; D_out is output dimension.
-# D_in, H1, D_out = 784, 20, 1
-#
-# test_con = False
+transform = transforms.ToTensor()
+train_set = datasets.MNIST("data/mnist/trainset", transform=transform, download=True)
+test_set = datasets.MNIST("data/mnist/testset", transform=transform, train=False, download=True)
+train_loader = DataLoader(train_set, batch_size=len(train_set))
+test_loader = DataLoader(test_set, batch_size=len(test_set))
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+train_inputs, train_targets = iter(train_loader).next()
+train_inputs = train_inputs.reshape(60000, 784).to(device)
+train_targets = train_targets.reshape(60000,-1).to(device)
+
+test_inputs, test_targets = iter(test_loader).next()
+test_inputs = test_inputs.reshape(10000, 784).to(device)
+test_targets = test_targets.reshape(10000,-1).to(device)
+
+n_train =60000
+x_train = train_inputs[0:n_train,:]
+y_train = train_targets[0:n_train].float()
+
+n_test =10000
+x_test = test_inputs[0:n_test,:]
+y_test = test_targets[0:n_test].float()
+
+# D_in is input dimension; Hs are hidden dimensions; D_out is output dimension.
+D_in, H1, D_out = 784, 20, 1
+
+test_con = False
 
 
 

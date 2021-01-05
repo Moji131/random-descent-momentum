@@ -13,13 +13,13 @@ for opt_i in opt_list:
     model[opt_i] = copy.deepcopy(model_o)
 
 
-###########  ABGDc #############
+###########  ALR-GDc #############
 n = 0
 if n in opt_list:
-    name[0] = "ABGDc"
-    from neural_network_ABGDc import abgd_c
+    name[0] = "ALR-GDc"
+    from neural_network_ALR_GDc import ALR_GDc
     drift=True
-    optimizer[0] = abgd_c(model[0].parameters(), lr=lr[0], min_step_r=2**5, max_step_r=2**5 )
+    optimizer[0] = ALR_GDc(model[0].parameters(), lr=lr[0], min_step_r=2**5, max_step_r=2**5 )
     #### defining the function to reevalute function and gradient if needed
     def closure():
         optimizer[0].np_to_params()
@@ -33,13 +33,13 @@ if n in opt_list:
     closure_list[0] = closure
 
 
-###########  ABGDv #############
+###########  ALR-GD #############
 n = 1
 if n in opt_list:
-    name[1] = "ABGDv"
-    from neural_network_ABGDv import abgd_v
+    name[1] = "ALR-GD"
+    from neural_network_ALR_GD import ALR_GD
     drift=True
-    optimizer[1] = abgd_v(model[1].parameters(), lr=lr[1])
+    optimizer[1] = ALR_GD(model[1].parameters(), lr=lr[1])
     #### defining the function to reevalute function and gradient if needed
     def closure():
         optimizer[1].np_to_params()
@@ -114,11 +114,11 @@ if n in opt_list:
 # closure_list[3] = closure
 
 
-###########  ABGDvmd #############
+###########  ALR-GDMd #############
 n = 4
 if n in opt_list:
-    name[4] = "ABGDvmd"
-    from neural_network_ABGDvmd import abgd_vmd
+    name[4] = "ALR-GDMd"
+    from neural_network_ALR_GDM import abgd_vmd
     momentum = 0.7
     drift = True
     optimizer[4] = abgd_vmd(model[4].parameters(), lr=lr[4], momentum=momentum, drift=drift)
@@ -135,12 +135,12 @@ if n in opt_list:
     closure_list[4] = closure
 
 
-# ###### ABGDcm ##################
+# ###### ALR-ADAM ##################
 n = 5
 if n in opt_list:
-    name[5] = "ABGDcm"
-    from neural_network_ABGDcm import abgd_cm
-    optimizer[5] = abgd_cm(model[5].parameters(), lr=lr[5])
+    name[5] = "ALR-ADAM"
+    from neural_network_ALR_ADAM import ALR_ADAM
+    optimizer[5] = ALR_ADAM(model[5].parameters(), lr=lr[5])
     #### defining the function to reevalute function and gradient if needed
     def closure():
         optimizer[5].np_to_params()
@@ -154,12 +154,12 @@ if n in opt_list:
     closure_list[5] = closure
 
 
-# ###### ABGDvm ##################
+# ###### ALR-GDM ##################
 n = 6
 if n in opt_list:
-    name[6] = "ABGDvm"
-    from neural_network_ABGDvm import abgd_vm
-    optimizer[6] = abgd_vm(model[6].parameters(), lr=lr[6])
+    name[6] = "ALR-GDM"
+    from neural_network_ALR_GDM import ALR_GDM
+    optimizer[6] = ALR_GDM(model[6].parameters(), lr=lr[6])
     #### defining the function to reevalute function and gradient if needed
     def closure():
         optimizer[6].np_to_params()
@@ -173,10 +173,10 @@ if n in opt_list:
     closure_list[6] = closure
 
 #
-# # ###### ABGDcm2_copy ##################
+# # ###### ALR-ADAM2_copy ##################
 # n = 7
-# name[7] = "ABGDcm2_copy"
-# from neural_network_ABGDcm2_copy import abgd_cm2_copy
+# name[7] = "ALR-ADAM2_copy"
+# from neural_network_ALR-ADAM2_copy import abgd_cm2_copy
 # optimizer[7] = abgd_cm2_copy(model[7].parameters(), lr=lr[7])
 # #### defining the function to reevalute function and gradient if needed
 # def closure():
@@ -191,10 +191,10 @@ if n in opt_list:
 # closure_list[7] = closure
 #
 #
-# # ###### ABGDvm2 ##################
+# # ###### ALR-GDM2 ##################
 # n = 8
-# name[8] = "ABGDvm2"
-# from neural_network_ABGDvm2 import abgd_vm
+# name[8] = "ALR-GDM2"
+# from neural_network_ALR-GDM2 import abgd_vm
 # optimizer[8] = abgd_vm_copy(model[8].parameters(), lr=lr[8])
 # #### defining the function to reevalute function and gradient if needed
 # def closure():

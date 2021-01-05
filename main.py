@@ -12,27 +12,21 @@ import os
 
 
 
-
-########### Optimiser functions ###########################
-###########################################################
-
-# from optimiser_ABGDc import abgd_c
-# from optimiser_ABGDv import abgd_v
-# from optimiser_ABGDcs import abgd_cs
-# from optimiser_ABGDvmd import abgd_vmd
-# from optimiser_ADAM import adam
-# from optimiser_GDM import gdm
-# from optimiser_ABGDcsd import abgd_csd
-# from optimiser_ABGDcm import abgd_cm
-# from optimiser_ADAM2 import adam2
-
 ### parameters
-#    [0    , 1    , 2   , 3  , 4      , 5      , 6     ]
-#    [ABGDc, ABGDv, ADAM, GDM, ABGDvmd, ABGDcm2, ABGDvm]
-lr = [0.1  , 0.1  , 2e-1, 3e-1, 0.1    , 1e+1   , 1e+1  , 1e+1        , 1e-1       , 1e+1]
-opt_list = [2,3,5,6] # list of optimizers to be applied
+#    [0      , 1     , 2   , 3  , 4       , 5       , 6       , 7   , 8   , 9   , 10  ]
+#    [ALR-GDc, ALR-GD, ADAM, GDM, ABGDvmd , ALR-ADAM, ALR-GDM , SPSA, RDM1, RDM2, RDM3]
+lr = [0.1    , 0.1   , 1e+1, 1e-2, 0.1    , 1e+1    , 1e+1    , 1e-2, 1e-2, 1e-3, 1e3]
+# lr = [0.1    , 0.1   , 1e+1, 1e-2, 0.1    , 1e+1    , 1e+1    , 1e-4, 1e-3, 1e-3, 1e3]
+lr = np.array(lr)
 
-max_iterations =3 # maximum number of iterations
+# opt_list = [0,1,2,3,5,6] # list of optimizers to be applied
+opt_list = [7, 8] # list of optimizers to be applied
+
+# max_iterations = 300 # maximum number of iterations
+# max_iterations = 3000 # maximum number of iterations
+
+max_iterations = 10000 # maximum number of iterations
+
 
 
 
@@ -40,12 +34,32 @@ max_iterations =3 # maximum number of iterations
 
 # ########### Selecting the test fucntion ###################
 # ###########################################################
-#
-#
+
+
+#########  Quadratic test function  #################
+
+from test_function_quadratic import quadratic_main as func_main
+from test_function_quadratic import quadratic_grad as func_grad
+d = 2
+list1 = []
+for i in range(d):
+    list1 = list1 + [1+(6-i%5)**5 /100 ]
+x_start = np.array(list1)
+max1 = max(list1)
+x_min = -max1 *1.1
+x_max = max1 *1.1
+y_min = -max1 *1.1
+y_max = max1 *1.1
+log_plot = True
+convergence_plt_title = "Convergence - Quadratic Function"
+trajectory_plt_title = "Trajectories - Quadratic Function"
+
+
+
 ############ Softmax test funcion ###############
 # To change the input data of the softmax regression go to test_function_softmax.py
 
-#
+
 # from test_function_softmax import softMax_main as func_main
 # from test_function_softmax import softMax_grad as func_grad
 # from test_function_softmax import d_func
@@ -71,33 +85,33 @@ max_iterations =3 # maximum number of iterations
 
 # #########  Rosenbrock test function  #################
 
-from test_function_rosenbrock import rosenbrock_main as func_main
-from test_function_rosenbrock import rosenbrock_grad as func_grad
-
-x_start = np.array([0.5, 1.5])
-d = 2
-
-x_min = -0.2
-x_max = 1.5
-y_min = -0.5
-y_max = 2.0
-x_opt = 0
-y_opt = 0
-log_plot = True
-convergence_plt_title = "Convergence - Rosenbrock Function"
-trajectory_plt_title = "Trajectories - Rosenbrock Function"
+# from test_function_rosenbrock import rosenbrock_main as func_main
+# from test_function_rosenbrock import rosenbrock_grad as func_grad
+#
+# x_start = np.array([0.5, 1.5])
+# d = 2
+#
+# x_min = -0.2
+# x_max = 1.5
+# y_min = -0.5
+# y_max = 2.0
+# x_opt = 0
+# y_opt = 0
+# log_plot = True
+# convergence_plt_title = "Convergence - Rosenbrock Function"
+# trajectory_plt_title = "Trajectories - Rosenbrock Function"
 
 
 #########  easom test function  #################
 
 # from test_function_easom import easom_main as func_main
 # from test_function_easom import easom_grad as func_grad
-# x_start = np.array([3.14 - 2, 3.14 - 2])
+# x_start = np.array([3.14 - 1.5, 3.14 - 0])
 # d = 2
-# x_min = 3.14 - 5
-# x_max = 3.14 + 5
-# y_min = 3.14 - 5
-# y_max = 3.14 + 5
+# x_min = 3.14 - 2
+# x_max = 3.14 + 2
+# y_min = 3.14 - 2
+# y_max = 3.14 + 2
 #
 # x_opt = 3.1416080159444633
 # y_opt = 3.1416080159444633
@@ -107,20 +121,6 @@ trajectory_plt_title = "Trajectories - Rosenbrock Function"
 
 
 
-#########  Quadratic test function  #################
-
-# from test_function_matyas import matyas_main as func_main
-# from test_function_matyas import matyas_grad as func_grad
-# d = 2
-# x_start = np.array([100, 2000])
-# x_min = -020.0
-# x_max = 220.0
-# y_min = -220.0
-# y_max = 2220
-# log_plot = True
-# convergence_plt_title = "Convergence - Quadratic Function"
-# trajectory_plt_title = "Trajectories - Quadratic Function"
-#
 
 
 ############ import optimizers ###############

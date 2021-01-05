@@ -1,8 +1,8 @@
 import numpy as np
 
 
-class abgd_vm():
-    def __init__(self, params, lr=0.01,  beta_list = [0, 0.9 , 0.95], find_lr = True, reset_min = True):
+class ALR_GDM():
+    def __init__(self, params, lr=0.01,  beta_list = [0.9], find_lr = True, reset_min = True):
 
         self.lr = lr  # learning rate
 
@@ -13,7 +13,7 @@ class abgd_vm():
 
 
         ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ABGDvm_init.py").read())
+        exec(open("./optimiser_ALR_GDM_init.py").read())
 
     def _update_params(self, closure):
 
@@ -24,119 +24,181 @@ class abgd_vm():
                 self.x_min = self.x
 
         ### normalizing gradient and setting input
-        g_normed = self.g / np.linalg.norm(self.g)  # normalized gradient
+        g_normed = self.g / np.linalg.norm(self.g)
+        # self.input = self.g
         self.input = g_normed
 
         # update all momentum
         for i_m in range(self.beta_size):
-            self.m_list[i_m] = (1 - self.alpha_list[i_m]) * self.m_list[i_m] + self.alpha_list[i_m] * self.input # updating momentum
+            self.m_list[i_m] = (1 - self.alpha_list[i_m]) * self.m_list[i_m] + self.alpha_list[i_m] * self.input  # updating momentum
+            self.m2_list[i_m] = (1 - self.alpha_list[i_m]/2) * self.m2_list[i_m] + self.alpha_list[i_m]/2 * self.input  # updating momentum
+            self.ind_m_m1 = self.ind_m
+            self.ind_m = np.linalg.norm(self.m_list[self.m_i])
+
 
         # calculating output
         self.output = self.m_list[self.m_i] / np.linalg.norm(self.m_list[self.m_i])  # normalized momentum
         if self.t == 1 and self.find_lr:  # calculate step_m if this is step 1
             n_step_min = 1
-            self.step_m = self._find_step_m(closure, self.step_m, self.output, n_step_min)  # finding initial step size
+            self.step_m = self._find_step_m(closure, self.step_m, self.output, n_step_min=n_step_min)  # finding initial step size
             self.lr = self.step_m
 
-        # calculating indicators
-        for i_m in range(0,self.beta_size):
-            self.ind_d_list_m1[i_m,:] = self.ind_d_list[i_m,:]
-            self.md_list[i_m] = (1- self.alpha_list[i_m]/2.0) * self.md_list[i_m]  + self.alpha_list[i_m]/2.0 * self.output
-            self.vd_list[i_m] = (1- self.alpha_list[i_m]/2.0) * self.vd_list[i_m]  + self.alpha_list[i_m]/2.0 * np.linalg.norm(self.output)
-            self.ind_d_list[i_m] = np.linalg.norm(self.md_list[i_m]) / self.vd_list[i_m]
+        # calculating momentum of momentum indicator
+        for i_m in range(0, self.beta_size):
+            m_normed = self.m_list[i_m] / np.linalg.norm(self.m_list[i_m])
+            self.mm_list[i_m] = (1 -self.alpha_list[i_m]) * self.mm_list[i_m] + self.alpha_list[i_m] * m_normed
+            self.ind_mm_m1 = self.ind_mm
+            self.ind_mm = np.linalg.norm(self.mm_list[i_m])
 
         # adjusting step_m
-        if self.delay_step <= 0 :
-            scale_step_m = 1 + self.alpha_list[self.m_i]
-            if self.ind_d_list[self.m_i,0] < 0.3:
-                self.step_m = self.step_m / 2
-                self.delay_step_up = 1
-            elif self.ind_d_list[self.m_i,0] < self.ind_d_list_m1[self.m_i,0]: # decrease step for low indicator
-                self.step_m = self.step_m / scale_step_m
-                self.delay_step_up = 1
-            elif self.delay_step_up > 0 : # increase step for high indicator
-                self.delay_step_up = self.delay_step_up - 1
-            else:
+        scale_step_m = 1 + self.alpha_list[self.m_i]
+        if self.ind_mm > 0.7:
+            if self.ind_mm > self.ind_mm_m1 and self.ind_m > self.ind_m_m1:
                 self.step_m = self.step_m * scale_step_m
-        else:
-            self.delay_step = self.delay_step -1
+        elif self.ind_mm < 0.3:
+            if self.ind_m < self.ind_m_m1:
+                self.step_m = self.step_m * self.ind_mm
+                # resetting this indicator
+                m_normed = self.m_list[self.m_i] / np.linalg.norm(self.m_list[self.m_i])
+                self.mm_list[self.m_i] = self.alpha_list[self.m_i] * m_normed
+                self.ind_mm = np.linalg.norm(self.mm_list[self.m_i])
 
 
+
+        # self.sub_m2 = True
+        # if self.sub_m2:
+        #     if self.ind_mm < 0.3 and self.ind_mm2 > 0.7:
+        #         self.m_list[self.m_i] = self.m2_list[self.m_i]
+
+
+
+        # # calculating momentum of momentum indicators
+        # for i_m in range(0, self.beta_size):
+        #     m_normed = self.m_list[i_m] / np.linalg.norm(self.m_list[i_m])
+        #
+        #     self.mm_list[i_m] = (1 -self.alpha_list[i_m]) * self.mm_list[i_m] + self.alpha_list[i_m] * m_normed
+        #     # self.vm_list[i_m] = (1- self.alpha_list[i_m]) * self.vm_list[i_m] + self.alpha_list[i_m] * 1
+        #
+        #     self.ind_mm_m1 = self.ind_mm
+        #     # self.ind_mm = np.linalg.norm(self.mm_list[i_m]) / self.vm_list[i_m,0]
+        #     self.ind_mm = np.linalg.norm(self.mm_list[i_m])
+        #
+
+
+        # # adjusting step_m
+        # scale_step_m = 1 + self.alpha_list[self.m_i]
+        # alpha = self.alpha_list[self.m_i]
+        #
+        # if self.ind_mm > 0.6:
+        #         if self.ind_mm > self.ind_mm_m1 and self.ind_m > self.ind_m_m1:
+        #             self.step_m = self.step_m * scale_step_m
+        # elif self.ind_mm < 0.4:
+        #     if (self.ind_m < (3 * alpha) ) and (self.ind_m < self.ind_m_m1) :
+        #         self.step_m = self.step_m / 4
+        #         # resetting this indicator
+        #         m_normed = self.m_list[self.m_i] / np.linalg.norm(self.m_list[self.m_i])
+        #         self.mm_list[self.m_i] = self.alpha_list[self.m_i] * m_normed
+        #         self.vm_list[self.m_i] = self.alpha_list[self.m_i] * 1
+        #         self.ind_mm = 1
+
+
+
+
+
+        self.x_m1 = self.x
         # update x
-        print("ABGDvm update. momentum, step_m:", self.beta_list[self.m_i], self.step_m)
+        print("ALR-GDM update. momentum, step_m:", self.beta_list[self.m_i], self.step_m)
         self.x = self.x - self.output * self.step_m
-
 
         # calculating step for going to higher momentum
         for i_m in range(0,self.beta_size):
             self.ms_list[i_m] = (1- self.alpha_list[i_m]) * self.ms_list[i_m]  + self.alpha_list[i_m] * self.output * self.step_m
 
-        # decide if change momentum
-        if self.m_i > 0 and self.ind_d_list[self.m_i, 0] < 0.3:
+        # change momentum
+        if self.m_i > 0 and self.ind_o_list[self.m_i, 0] < 0.25:
             self.m_i = self.m_i - 1
-            # self.delay_step = int(2 / self.alpha_list[self.m_i])
+            self.delay_step = int(2 / self.alpha_list[self.m_i]) - 1
+            # resetting this indicator
+            self.mo_list[self.m_i] = 0
+            self.vo_list[self.m_i] = 0
+            for i_m in range(self.beta_size):  # reset all momentum to zero
+                self.m_list[i_m] = 0
+                self.ms_list[i_m] = 0
             if self.reset_min: # reset to minimum found till now
                 self.x = self.x_min  # reset position to min found till now
-                for i_m in range(self.beta_size): # reset all momentum to zero
-                    self.ms_list[i_m] = 0
         elif self.m_i < self.beta_size-1:
-            if self.ind_d_list[self.m_i+1, 0] > self.ind_d_list[self.m_i, 0]:
+            if self.ind_o_list[self.m_i+1, 0] > self.ind_o_list[self.m_i, 0]:
                 self.m_i = self.m_i + 1
                 self.step_m = np.linalg.norm(self.ms_list[self.m_i])
-                # self.delay_step = int(2 / self.alpha_list[self.m_i])
+                self.delay_step = int(2 / self.alpha_list[self.m_i]) - 1
+                # resetting this indicator
+                self.mo_list[self.m_i] = 0
+                self.vo_list[self.m_i] = 0
 
 
 
 
-        ######## ouput indicators to file
-        if self.t == 1:
-            self.loss0 = self.loss1
-
-        scale_main = self.loss0
-        ff = open('outputs/main/0-ind_d-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str(self.ind_d_list[self.m_i, 0] * scale_main) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/main/0-beta_i-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str(self.m_i * scale_main / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/main/0-step_m-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( scale_main * self.step_m / self.lr / 2 ) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-
-
-        scale_nn = self.loss0
-        ff = open('outputs/neural_network/train/0-ind_d-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str(self.ind_d_list[self.m_i, 0] * scale_nn) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/neural_network/train/0-beta_i-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str(self.m_i * scale_nn / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/neural_network/train/0-step_m-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( scale_nn * self.step_m / self.lr / 2 ) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-
-        scale_nn = self.loss0
-        ff = open('outputs/neural_network_minibatch/train/0-ind_l-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str(self.ind_d_list[self.m_i, 0] * scale_nn) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/neural_network_minibatch/train/0-beta_i-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str(self.m_i * scale_nn / (self.beta_size)) + "\n"
-        ff.write(str_to_file)
-        ff.close()
-        ff = open('outputs/neural_network_minibatch/train/0-step_m-vm', 'a')
-        str_to_file = str(self.t) + "\t" + str( scale_nn * self.step_m / self.lr / 2 ) + "\n"
-        ff.write(str_to_file)
-        ff.close()
+        # ######## ouput indicators to file
+        # if self.t == 1:
+        #     self.loss0 = self.loss1
+        #
+        # scale = self.loss0
+        #
+        # ff = open('outputs/main/0-ind_m-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str(self.ind_m * scale) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/main/0-ind_mm-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str(self.ind_mm * scale) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/main/0-step_m-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str( scale * self.step_m / self.lr / 2 ) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # # ff = open('outputs/main/0-beta_i-ALR-GDM', 'a')
+        # # str_to_file = str(self.t) + "\t" + str(self.m_i * scale / (self.beta_size)) + "\n"
+        # # ff.write(str_to_file)
+        # # ff.close()
+        #
+        # ff = open('outputs/neural_network/train/0-ind_m-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str(self.ind_m * scale) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/neural_network/train/0-ind_mm-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str(self.ind_mm * scale) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/neural_network/train/0-step_m-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str( scale * self.step_m / self.lr / 2 ) + "\n"
+        # ff.write(str_to_file)
+        # # ff.close()
+        # # ff = open('outputs/neural_network/train/0-beta_i-ALR-GDM', 'a')
+        # # str_to_file = str(self.t) + "\t" + str(self.m_i * scale / (self.beta_size)) + "\n"
+        # # ff.write(str_to_file)
+        # # ff.close()
+        #
+        #
+        # ff = open('outputs/neural_network_minibatch/train/0-ind_m-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str(self.ind_m * scale) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/neural_network_minibatch/train/0-ind_mm-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str(self.ind_mm * scale) + "\n"
+        # ff.write(str_to_file)
+        # ff.close()
+        # ff = open('outputs/neural_network_minibatch/train/0-step_m-ALR-GDM', 'a')
+        # str_to_file = str(self.t) + "\t" + str( scale * self.step_m / self.lr / 2 ) + "\n"
+        # ff.write(str_to_file)
+        # # ff.close()
+        # # ff = open('outputs/neural_network_minibatch/train/0-beta_i-ALR-GDM', 'a')
+        # # str_to_file = str(self.t) + "\t" + str(self.m_i * scale / (self.beta_size)) + "\n"
+        # # ff.write(str_to_file)
+        # # ff.close()
 
         # saving values for next step
         self.t = self.t + 1
+        self.loss_m1 = self.loss1
 
 
 
@@ -165,8 +227,8 @@ class abgd_vm():
             n1 = n1 + 1
 
         loss0 = closure()
-        print("ABGDvm _find_step_g: step_m is", self.step_m)
-        print("ABGDvm _find_step_g: step_g is set to", step)
+        print("ALR-GDM _find_step_g: step_m is", self.step_m)
+        print("ALR-GDM _find_step_g: step_g is set to", step)
 
         return step
 
@@ -176,7 +238,7 @@ class abgd_vm():
 
 
     def _find_step_m(self, closure, step, o, n_step_min = 10):
-        print("ABGDvm, _find_step_m:")
+        print("ALR-GDM, _find_step_m:")
 
         s = np.zeros(5)
         # stage1_step = np.array([])
@@ -303,7 +365,7 @@ class abgd_vm():
         # plt.axvline(x=sout)
         # plt.xlabel('step')
         # plt.ylabel('loss')
-        # plt.title('ABGDvm step finder')
+        # plt.title('ALR-GDM step finder')
         # plt.show()
 
         print("step_min, error, step_out :", step_min , ds , sout)
@@ -334,7 +396,7 @@ class abgd_vm():
 #
 #
 #         ##### initialising parameters specific to the algorithm #######
-#         exec(open("./optimiser_ABGDvm_init.py").read())
+#         exec(open("./optimiser_ALR_GDM_init.py").read())
 #
 #     def _update_params(self, closure):
 #
@@ -362,31 +424,31 @@ class abgd_vm():
 #         d = self.x - self.x_m1
 #         for i in range(0,self.beta_size):
 #             if self.beta_list[i] == 0: # for mometum zero
-#                 self.ind_d_list[i] = np.linalg.norm(g_normed + self.g_m1_normed)/2
+#                 self.ind_o_list[i] = np.linalg.norm(g_normed + self.g_m1_normed)/2
 #             else:  # for momentum nonzero
 #                 self.md_list[i] = self.beta_list[i] * self.md_list[i]  + (1- self.beta_list[i]) * d
 #                 self.vd_list[i] = self.beta_list[i] * self.vd_list[i]  + (1- self.beta_list[i]) * np.linalg.norm(d)
-#                 self.ind_d_list[i] = np.linalg.norm(self.md_list[i]) / self.vd_list[i]
+#                 self.ind_o_list[i] = np.linalg.norm(self.md_list[i]) / self.vd_list[i]
 #
 #         # adjusting steps
 #         if self.beta_list[self.m_i] == 0: # for mometum zero
-#             if self.ind_d_list[self.m_i,0] < 0.5:
+#             if self.ind_o_list[self.m_i,0] < 0.5:
 #                 self.step_g = 0.5 * self.step_g
 #                 self.g_delay = 1
-#             elif self.ind_d_list[self.m_i,0] > 0.6 and self.g_delay < 1:
+#             elif self.ind_o_list[self.m_i,0] > 0.6 and self.g_delay < 1:
 #                 self.step_g = 2.0 * self.step_g
 #             else:
 #                 self.g_delay = self.g_delay - 1
 #         else: # for momentum nonzero
 #             scale_step_m = 1 + (1-self.beta_list[self.m_i]) * 0.1
-#             if self.ind_d_list[self.m_i,0] < 0.5: # decrease step for low indicator
+#             if self.ind_o_list[self.m_i,0] < 0.5: # decrease step for low indicator
 #                 self.step_m = self.step_m / scale_step_m
-#             elif self.ind_d_list[self.m_i,0] > 0.6: # increase step for high indicator
+#             elif self.ind_o_list[self.m_i,0] > 0.6: # increase step for high indicator
 #                 self.step_m = self.step_m * scale_step_m
 #
 #
 #         # condition to push momentum down
-#         if self.m_i > 0 and self.ind_d_list[self.m_i,0] < 0.2:
+#         if self.m_i > 0 and self.ind_o_list[self.m_i,0] < 0.2:
 #             print(">>>>>  push down, momentum is now", self.beta_list[self.m_i])
 #             self.m_i = self.m_i - 1
 #             if self.beta_list[self.m_i] == 0 and self.cal_step_g: # if momentum is zero recalculate step_g
@@ -403,7 +465,7 @@ class abgd_vm():
 #
 #         # condition to push momentum up
 #         if self.m_i < self.beta_size-1:
-#             if self.ind_d_list[self.m_i+1, 0] > 0.4:
+#             if self.ind_o_list[self.m_i+1, 0] > 0.4:
 #                 print(">>>>>  push up, momentum is now", self.beta_list[self.m_i])
 #                 self.m_i = self.m_i + 1
 #
@@ -432,8 +494,8 @@ class abgd_vm():
 #             self.loss0 = self.loss1
 #
 #         # scale_main = self.loss0
-#         # ff = open('outputs/main/0-ind_d-vm', 'a')
-#         # str_to_file = str(self.t) + "\t" + str(self.ind_d_list[self.m_i, 0] * scale_main) + "\n"
+#         # ff = open('outputs/main/0-ind_o-vm', 'a')
+#         # str_to_file = str(self.t) + "\t" + str(self.ind_o_list[self.m_i, 0] * scale_main) + "\n"
 #         # ff.write(str_to_file)
 #         # ff.close()
 #         # ff = open('outputs/main/0-beta_i-vm', 'a')
@@ -442,8 +504,8 @@ class abgd_vm():
 #         # ff.close()
 #
 #         # scale_nn = self.loss0
-#         # ff = open('outputs/neural_network/train/0-ind_d-vm', 'a')
-#         # str_to_file = str(self.t) + "\t" + str(self.ind_d_list[self.m_i, 0] * scale_nn) + "\n"
+#         # ff = open('outputs/neural_network/train/0-ind_o-vm', 'a')
+#         # str_to_file = str(self.t) + "\t" + str(self.ind_o_list[self.m_i, 0] * scale_nn) + "\n"
 #         # ff.write(str_to_file)
 #         # ff.close()
 #         # ff = open('outputs/neural_network/train/0-beta_i-vm', 'a')
@@ -456,8 +518,8 @@ class abgd_vm():
 #         # ff.close()
 #
 #         scale_nn = self.loss0
-#         ff = open('outputs/neural_network_minibatch/train/0-ind_d-vm', 'a')
-#         str_to_file = str(self.t) + "\t" + str(self.ind_d_list[self.m_i, 0] * scale_nn) + "\n"
+#         ff = open('outputs/neural_network_minibatch/train/0-ind_o-vm', 'a')
+#         str_to_file = str(self.t) + "\t" + str(self.ind_o_list[self.m_i, 0] * scale_nn) + "\n"
 #         ff.write(str_to_file)
 #         ff.close()
 #         ff = open('outputs/neural_network_minibatch/train/0-beta_i-vm', 'a')
