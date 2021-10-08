@@ -3,7 +3,7 @@
 
 import numpy as np
 
-class gdm():
+class opt():
     def __init__(self, params, lr=0.01, momentum = 0.9):
 
         self.lr = lr
@@ -13,8 +13,10 @@ class gdm():
         self.x = np.zeros(self.d)
         self.g = np.zeros(self.d)
 
-        ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_GDM_init.py").read())
+        self.beta = momentum
+        self.m = np.zeros(self.d)
+        self.step_m = self.lr
+        self.t = 1
 
 
 

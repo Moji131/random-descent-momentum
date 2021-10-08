@@ -1,51 +1,54 @@
+
+
+
 import numpy as np
 
+class opt():
+    def __init__(self, params, lr=0.01, min_step_r=2**20, max_step_r=2**20 ):
 
-class ALR_GD():
-    def __init__(self, params, lr=0.01):
+        self.lr = lr
 
-        self.lr = lr  # learning rate
-
-        self.d = len(params)  # input dimension
-
-
+        self.d = len(params)
 
         self.x = np.zeros(self.d)
         self.g = np.zeros(self.d)
+        
+        self.min_step_r = min_step_r
+        self.max_step_r = max_step_r
+
+        self.step_g = np.ones(self.d) * lr  # inital step_g (can be anything)
+        self.g_m1_sign = np.ones(self.d)   # get the sign of the components
+        self.g_m1_m2 = np.ones(self.d)  # initialising product of sign of gradient of step_g 0 and -1
 
 
-        ##### initialising parameters specific to the algorithm #######
-        exec(open("./optimiser_ALR_GD_init.py").read())
+        self.t = 1
 
 
 
     def _update_params(self, closure):
 
-        ### normalizing gradient
-        g_0_norm = np.linalg.norm(self.g)  # norm of the gradient
-        g_0_normed = self.g / g_0_norm  # normalized gradient
+        g_0_sign = np.sign(self.g)  # sign of the components
+        g_0_m1 = g_0_sign * self.g_m1_sign  # product of sign of gradient of step 1 and 0
 
         if self.t == 1:  # calculate step_m if this is step 1
             n_step_min = 0.5
-            self.output = g_0_normed
-            self.step_g = self._find_step_m(closure, self.step_g, self.output, n_step_min)  # finding initial step size
-            self.lr = self.step_g
+            self.output = g_0_sign
+            self.step_g = self.lr * np.ones(self.d)
 
-        ### caculating step_g_g for the next iteration
-        g_0_m1_dot = np.dot(g_0_normed, self.g_m1_normed)
-        if g_0_m1_dot < 0:
-            self.step_g = self.step_g * 0.5
-        elif self.g_0_m1_dot_m1 < 0:
-            self.step_g = self.step_g * 1.0
-        else:
-            self.step_g = self.step_g * 2.0
 
-        ### updating parameters
-        self.x = self.x - g_0_normed * self.step_g
+        step_g_mult = np.ones(self.d) * 2.0  #  setting all step_g multipliers to 2
+        step_g_mult = np.where(self.g_m1_m2 == -1.0, 1.0, step_g_mult) #  if g_0_m1 is -1 change step_g_mult component to 1
+        step_g_mult = np.where(g_0_m1 == -1.0, 0.5, step_g_mult)  #  if g_1_0 is -1 change step_g_mult component to 0.5
+        self.step_g = self.step_g * step_g_mult  # use step_g_mult to update current step_g sizes
 
-        ### save values for the next step
-        self.g_m1_normed = g_0_normed
-        self.g_0_m1_dot_m1 = g_0_m1_dot
+        self.step_g = np.where(self.step_g < (self.lr/self.min_step_r), (self.lr/self.min_step_r), self.step_g)  # minimum step size check
+        self.step_g = np.where(self.step_g > (self.lr*self.max_step_r), (self.lr*self.max_step_r), self.step_g)  # maximum step size check
+
+        self.x = self.x - g_0_sign * self.step_g  # advance x one step_g
+
+        #  preparation for  the next step
+        self.g_m1_sign = g_0_sign  # get the sign of the components
+        self.g_m1_m2 = g_0_m1
 
         self.t = self.t + 1
 
@@ -58,29 +61,10 @@ class ALR_GD():
 
 
 
-    # def _find_lr(self, closure):
-    #     self.step_g = self.lr / 1000
-    #     xx = self.x[:]
-    #     loss0 = closure()
-    #     loss2 = loss0
-    #     loss1 = loss0
-    #
-    #     while not loss2 > loss1:
-    #         loss1 = loss2
-    #         self.step_g = 10 * self.step_g
-    #         self._update_params(closure)
-    #         loss2 = closure()
-    #         self.x = xx
-    #
-    #
-    #     loss0 = closure()
-    #     self.step_g = float('{:0.1e}'.format(  ( self.step_g/10 + (loss0-loss1)*(self.step_g-self.step_g/10)/(loss2-loss1) ) / 20 ))
-    #     self.lr = self.step_g
-
 
 
     def _find_step_m(self, closure, step, o, n_step_min = 10):
-        print("ALR-GD, _find_step_m:")
+        print("ALR-GDc, _find_step_m:")
 
         s = np.zeros(5)
         # stage1_step = np.array([])

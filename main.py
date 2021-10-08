@@ -12,23 +12,7 @@ import os
 
 
 
-### parameters
-#    [0      , 1     , 2   , 3  , 4       , 5       , 6       , 7   , 8   , 9   , 10  ]
-#    [ALR-GDc, ALR-GD, ADAM, GDM, ABGDvmd , ALR-ADAM, ALR-GDM , SPSA, RDM1, RDM2, RDM3]
-lr = [0.1    , 0.1   , 1e+1, 1e-2, 0.1    , 1e+1    , 1e+1    , 1e-2, 1e-2, 1e-3, 1e3]
-# lr = [0.1    , 0.1   , 1e+1, 1e-2, 0.1    , 1e+1    , 1e+1    , 1e-4, 1e-3, 1e-3, 1e3]
-lr = np.array(lr)
-
-# opt_list = [0,1,2,3,5,6] # list of optimizers to be applied
-opt_list = [7, 8] # list of optimizers to be applied
-
-# max_iterations = 300 # maximum number of iterations
-# max_iterations = 3000 # maximum number of iterations
-
-max_iterations = 10000 # maximum number of iterations
-
-
-
+max_iterations = 10 # maximum number of iterations
 
 
 
@@ -126,7 +110,37 @@ trajectory_plt_title = "Trajectories - Quadratic Function"
 ############ import optimizers ###############
 ##############################################
 
-exec(open("./optimizers.py").read())
+# opt_list = ['optimizer_ADAM', 'optimizer_ANGD', 'optimizer_ANGDc', 'optimizer_GDM']
+# lr =  [ 1e-1,              1e-1,                 1e-1,           ,  1e-1            ]
+
+opt_list = ['optimizer_GDM']
+lr =  [ 1e-1             ]
+
+opt_n = len(opt_list) # number of optimizers defined
+
+
+optimizer = [ 0 for i in range(opt_n)]
+label = [ 0 for i in range(opt_n)]
+x_out = [ 0 for i in range(opt_n)]
+t_out = [ 0 for i in range(opt_n)]
+closure_list = [ 0 for i in range(opt_n)]
+
+
+
+
+for i, opt in enumerate(opt_list):
+    opt1 = __import__(opt)
+    optimizer[i] = opt1.opt(x_start, lr[i])
+    optimizer[i].x = x_start
+    label[i] = opt_list[i] + " lr=" + str(lr[i])
+    x_out[i] = [x_start]
+    t_out[i] = [0]
+    #defining the function to reevaluate function and gradient if needed
+    def closure():
+        optimizer[i].g = func_grad(optimizer[i].x)
+        loss = func_main(optimizer[i].x)
+        return loss
+    closure_list[i] = closure
 
 
 ######  creating files to output data ########
@@ -150,18 +164,19 @@ file = [ 0 for i in range(opt_n)]
 for t in range(1,max_iterations):
     print(t)
 
-    for opt_i in opt_list:
+    for opt_i, opt in enumerate(opt_list):
         fv = func_main(optimizer[opt_i].x)
         optimizer[opt_i].loss1 = fv
         optimizer[opt_i].g = func_grad(optimizer[opt_i].x)
-        optimizer[opt_i].step(closure_list[opt_i])
+
+        optimizer[opt_i].step(closure_list[opt_i] )
         x_out[opt_i] = np.append(x_out[opt_i], [optimizer[opt_i].x], axis=0)
         t_out[opt_i] = np.append(t_out[opt_i], [t], axis=0)
 
 
         lr1 =  str( optimizer[opt_i].lr )
         lr1 = "-lr=" + lr1
-        file[opt_i] = open('outputs/main/' + name[opt_i] + lr1 , 'a')
+        file[opt_i] = open('outputs/main/' + opt_list[opt_i] + lr1 , 'a')
         str_to_file = str(t) + "\t" + str(fv) + "\n"
         file[opt_i].write(str_to_file)
         file[opt_i].close()
@@ -206,8 +221,8 @@ if d  == 2:
     ### adding trajectories to two dimensional test plots #####
 
     # plotting the trajectory of bisection gradient descent
-    for i_opt in opt_list:
-        ax1.plot(x_out[i_opt][:,0], x_out[i_opt][:,1], '-o', label=name[i_opt])
+    for i_opt, opt in enumerate(opt_list):
+        ax1.plot(x_out[i_opt][:,0], x_out[i_opt][:,1], '-o', label=opt_list[i_opt])
 
     plt.title(trajectory_plt_title)
     legend = ax1.legend()
